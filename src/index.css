@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* *{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+} */
+/* 🌿 Custom Theme Variables */
+
+@theme {
+  /* 🔷 Primary Medical Colors */
+  --color-primary: #0E7490;
+  --color-primary-light: #14B8A6;
+  --color-primary-dark: #0C4A6E;
+
+  /* 🔷 Status Colors */
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
+
+  /* 🔷 Background & UI */
+  --color-background: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-sidebar: #0F172A;
+
+  /* 🔷 Text */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #64748B;
+
+  /* 🔷 Borders */
+  --color-border-light: #E2E8F0;
+  --color-muted: #F1F5F9;
+
+  /* 🔷 Radius */
+  --radius-xl2: 16px;
+
+  /* 🔷 Shadows */
+  --shadow-soft: 0px 4px 20px rgba(0,0,0,0.05);
+  --shadow-card: 0px 8px 30px rgba(0,0,0,0.06);
+}
+body{
+  background-color: #F8FAFC;
+ 
+}
