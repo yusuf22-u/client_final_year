@@ -79,7 +79,7 @@ const profile = await API.get("/users/profile", {
 });
 setUser(profile.data);
 
-window.location.href = "/dashboard";
+window.location.href = "/admin";
   } catch (error) {
     setServerError(
       error.response?.data?.message || "Login failed"

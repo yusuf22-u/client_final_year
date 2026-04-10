@@ -1,27 +1,42 @@
-import React, { useEffect, useState } from "react";
-import { Plus, Edit, Trash2 } from "lucide-react";
-import API from "../api/axios.js";
-import PatientForm from "../components/PatientForm.jsx";
+import React, { useState, useEffect } from "react";
+import PatientForm from "../components/PatientForm";
+import API from "../api/axios";
+import toast from "react-hot-toast";
+import { User, Search, Plus, Eye, Edit3 } from "lucide-react";
+import ViewPatientModal from "../components/ViewPatientModal";
 
-function Patients() {
+function Patient() {
   const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editingPatient, setEditingPatient] = useState(null);
-  const [serverError, setServerError] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [viewPatient, setViewPatient] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
-  // fetch patients
+  // console.log("patients",patients)
+
+
+  const calculateAge = (dob) => {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // If birth month hasn't occurred yet this year, or same month but birth day hasn't occurred
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
   const fetchPatients = async () => {
-    setLoading(true);
     try {
       const res = await API.get("/patients");
       setPatients(res.data);
-      console.log("patient",res.data)
-      setServerError("");
     } catch (error) {
-      setServerError(error.response?.data?.message || "Failed to fetch patients");
-    } finally {
-      setLoading(false);
+      toast.error("Failed to fetch patients");
     }
   };
 
@@ -29,128 +44,176 @@ function Patients() {
     fetchPatients();
   }, []);
 
-  const handleAddClick = () => {
-    setEditingPatient(null);
-    setShowForm(true);
-  };
-
-  const handleEditClick = (patient) => {
-    setEditingPatient(patient);
-    setShowForm(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this patient?")) return;
-    try {
-      await API.delete(`/patients/${id}`);
-      setPatients(patients.filter((p) => p.id !== id));
-    } catch (error) {
-      setServerError(error.response?.data?.message || "Failed to delete patient");
-    }
-  };
-
-  const handleFormSubmit = (updated) => {
-    if (editingPatient) {
-      setPatients(
-        patients.map((p) => (p.id === updated.id ? updated : p))
-      );
-    } else {
-      setPatients([updated, ...patients]);
-    }
-    setShowForm(false);
-  };
+  const filteredPatients = patients.filter(
+    (p) =>
+      (filterStatus === "all" || p.status === filterStatus) &&
+      (p.first_name.toLowerCase().includes(search.toLowerCase()) ||
+        p.last_name.toLowerCase().includes(search.toLowerCase()) ||
+        p.status.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
-    <div className="p-6 bg-background min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Patients</h1>
-        <button
-          onClick={handleAddClick}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl hover:bg-primary-dark transition-colors"
-        >
-          <Plus size={16} />
-          Add Patient
-        </button>
-      </div>
-
-      {serverError && (
-        <p className="text-red-500 mb-4">{serverError}</p>
-      )}
-
-      {loading ? (
-        <div className="text-center py-10">Loading patients...</div>
-      ) : (
-        <div className="overflow-x-auto bg-white shadow rounded-xl">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">
-                  Profile
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">
-                  Name
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">
-                  Email
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">
-                  Phone
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {patients.map((patient) => (
-                <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-2">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 flex items-center justify-center text-white font-bold">
-                      {patient.profile_image ? (
-                        <img
-                          src={`http://localhost:4000/uploads/${patient.profile_image}`}
-                          alt="profile"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        `${patient.first_name[0] || ""}${patient.last_name[0] || ""}`
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-2">{patient.first_name} {patient.last_name}</td>
-                  <td className="px-4 py-2">{patient.email}</td>
-                  <td className="px-4 py-2">{patient.phone}</td>
-                  <td className="px-4 py-2 flex gap-2">
-                    <button
-                      onClick={() => handleEditClick(patient)}
-                      className="p-2 bg-yellow-400 text-white rounded-xl hover:bg-yellow-500 transition-colors"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(patient.id)}
-                      className="p-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="p-6 bg-gray-50 min-h-screen font-inter">
+      {/* Stats */}
+      <main className="flex justify-center flex-col ml-64 mt-12 ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          {[
+            { title: "Total Patient", count: 8 },
+            { title: "Stable", count: 4 },
+            { title: "Critical", count: 2 },
+            { title: "Monitor", count: 8 },
+          ].map((card, i) => (
+            <div key={i} className="bg-white p-4 rounded-2xl shadow flex flex-col items-center">
+              <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-teal-100 mb-3">
+                <User className="w-5 h-5 text-teal-600" />
+              </div>
+              <p className="text-2xl font-bold text-gray-800">{card.count}</p>
+              <p className="text-sm font-semibold text-gray-500">{card.title}</p>
+            </div>
+          ))}
         </div>
-      )}
 
-      {/* Modal Form */}
-      {showForm && (
-        <PatientForm
-          patient={editingPatient}
-          onClose={() => setShowForm(false)}
-          onSubmit={handleFormSubmit}
-        />
-      )}
+        {/* Table */}
+        <div className="bg-white rounded-2xl shadow p-4 flex flex-col">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-72">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search patients, doctors, conditions..."
+                  className="pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 w-full focus:outline-none focus:border-teal-400 focus:bg-white transition"
+                />
+              </div>
+
+              <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+                {["all", "stable", "monitoring", "critical", "improving"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setFilterStatus(s)}
+                    className={`px-3 py-1.5 rounded-lg text-xs capitalize transition-all ${filterStatus === s ? "bg-teal-600 text-white font-semibold" : "text-gray-500 font-medium"
+                      }`}
+                  >
+                    {s === "all" ? "All" : s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm bg-teal-600 hover:opacity-90 transition shadow-md"
+            >
+              <Plus className="w-4 h-4" /> Add Patient
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  {[
+                    "Patient",
+                    "Age / Gender",
+                    "Condition",
+                    "Assigned Doctor",
+                    "Last Visit",
+                    "Next Visit",
+                    "Status",
+                    "Actions",
+                  ].map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs text-gray-400 uppercase tracking-wider font-semibold">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPatients.map((p) => (
+                  <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ background: "linear-gradient(135deg, #0E7490, #14B8A6)" }}>
+                        {p.first_name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">{p.first_name}</p>
+                        <p className="text-xs text-gray-400">{p.last_name}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{calculateAge(p.date_of_birth)} yrs · {p.gender}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-700">{p.address}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">Dr. Darboe</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{p.lastVisit}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{p.nextVisit}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${p.status === "stable" ? "bg-green-100 text-green-600" : p.status === "critical" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-600"}`}>
+                        {p.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setViewPatient(p);      // store clicked patient
+                          setShowViewModal(true); // open modal
+                        }}
+                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-teal-300 hover:text-teal-600 hover:bg-teal-50 transition"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> View
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedPatient(p);   // store patient to edit
+                          setShowAddModal(true);   // open modal
+                        }}
+                        className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-gray-400" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 text-xs text-gray-400">
+            Showing {filteredPatients.length} of {patients.length} patients
+          </div>
+        </div>
+
+        {showAddModal && (
+          <PatientForm
+            patient={selectedPatient}   // 🔥 important
+            onClose={() => {
+              setShowAddModal(false);
+              setSelectedPatient(null); // reset
+            }}
+            onSubmit={() => {
+              fetchPatients();
+              setShowAddModal(false);
+              setSelectedPatient(null);
+              toast.success(
+                selectedPatient ? "Patient updated successfully" : "Patient added successfully"
+              );
+            }}
+
+          />
+        )}
+        
+
+        {showViewModal && (
+          <ViewPatientModal
+            patient={viewPatient}
+            onClose={() => {
+              setShowViewModal(false);
+              setViewPatient(null);
+            }}
+          />
+        )}
+
+      </main>
+
     </div>
   );
 }
 
-export default Patients;
+export default Patient;

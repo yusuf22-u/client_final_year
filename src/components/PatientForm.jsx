@@ -11,6 +11,8 @@ function PatientForm({ patient, onClose, onSubmit }) {
     gender: "",
     date_of_birth: "",
     address: "",
+    medical_record_number: "",
+    insurance: "",
     profile_image: null,
   });
 
@@ -18,7 +20,7 @@ function PatientForm({ patient, onClose, onSubmit }) {
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
   const [serverError, setServerError] = useState("");
-
+ 
   useEffect(() => {
     if (patient) {
       setFormData({
@@ -29,6 +31,8 @@ function PatientForm({ patient, onClose, onSubmit }) {
         gender: patient.gender || "",
         date_of_birth: patient.date_of_birth?.split("T")[0] || "",
         address: patient.address || "",
+        medical_record_number: patient.medical_record_number || "",
+        insurance: patient.insurance || "",
         profile_image: null,
       });
       if (patient.profile_image) {
@@ -59,6 +63,8 @@ function PatientForm({ patient, onClose, onSubmit }) {
     if (!formData.gender) errs.gender = "Gender is required";
     if (!formData.date_of_birth) errs.date_of_birth = "Date of birth is required";
     if (!formData.address.trim()) errs.address = "Address is required";
+    if (!formData.medical_record_number.trim()) errs.medical_record_number = "medical record number is required";
+    if (!formData.insurance.trim()) errs.insurance = "insurance  is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -89,6 +95,7 @@ function PatientForm({ patient, onClose, onSubmit }) {
       onSubmit(res.data);
     } catch (error) {
       setServerError(error.response?.data?.message || "Failed to save patient");
+      console.log("error", error)
     } finally {
       setLoading(false);
     }
@@ -104,7 +111,9 @@ function PatientForm({ patient, onClose, onSubmit }) {
           <X size={20} />
         </button>
 
-        <h2 className="text-xl font-bold mb-4">{patient ? "Edit Patient" : "Add Patient"}</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {patient ? "Edit Patient" : "Add Patient"}
+        </h2>
 
         {serverError && <p className="text-red-500 mb-2">{serverError}</p>}
 
@@ -185,7 +194,28 @@ function PatientForm({ patient, onClose, onSubmit }) {
               />
               {errors.date_of_birth && <p className="text-red-500 text-xs mt-1">{errors.date_of_birth}</p>}
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1"> medical_record_number</label>
+              <input
+                type="text"
+                name="medical_record_number"
+                value={formData.medical_record_number}
+                onChange={handleChange}
+                className="w-full border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              {errors.medical_record_number && <p className="text-red-500 text-xs mt-1">{errors.medical_record_number}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1"> insurance </label>
+              <input
+                type="text"
+                name="insurance"
+                value={formData.insurance}
+                onChange={handleChange}
+                className="w-full border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              {errors.insurance && <p className="text-red-500 text-xs mt-1">{errors.insurance}</p>}
+            </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
               <textarea
