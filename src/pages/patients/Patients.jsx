@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import PatientForm from "../components/PatientForm";
-import API from "../api/axios";
+import PatientForm from "../../components/PatientForm";
+import API from "../../api/axios";
 import toast from "react-hot-toast";
 import { User, Search, Plus, Eye, Edit3 } from "lucide-react";
-import ViewPatientModal from "../components/ViewPatientModal";
+import ViewPatientModal from "../../components/ViewPatientModal";
 
 function Patient() {
   const [patients, setPatients] = useState([]);
@@ -44,6 +44,8 @@ function Patient() {
     fetchPatients();
   }, []);
 
+
+
   const filteredPatients = patients.filter(
     (p) =>
       (filterStatus === "all" || p.status === filterStatus) &&
@@ -51,26 +53,56 @@ function Patient() {
         p.last_name.toLowerCase().includes(search.toLowerCase()) ||
         p.status.toLowerCase().includes(search.toLowerCase()))
   );
+  // card color
+  const cardColor=(status)=>{
+    if(status==="Stable") return "rounded-lg bg-teal-100 mb-3 text-teal-600 w-12 h-12 flex items-center justify-center";
+    if(status==="Critical") return "rounded-lg bg-red-100 mb-3 text-red-600 w-12 h-12 flex items-center justify-center";
+    if(status==="Monitor") return "rounded-lg bg-yellow-100 mb-3 text-yellow-600 w-12 h-12 flex items-center justify-center";
+    if(status==="Total Patient") return "rounded-lg bg-blue-100 mb-3 text-blue-600 w-12 h-12 flex items-center justify-center";
+    
+  }
+  const TotalStable=patients.filter((p)=>(p.status==="stable")).length
+  const TotalCritical=patients.filter((p)=>(p.status==="critical")).length
+  const TotalMonitoring=patients.filter((p)=>(p.status==="monitoring")).length
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-inter">
       {/* Stats */}
       <main className="flex justify-center flex-col ml-64 mt-12 ">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {[
-            { title: "Total Patient", count: 8 },
-            { title: "Stable", count: 4 },
-            { title: "Critical", count: 2 },
-            { title: "Monitor", count: 8 },
-          ].map((card, i) => (
-            <div key={i} className="bg-white p-4 rounded-2xl shadow flex flex-col items-center">
-              <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-teal-100 mb-3">
-                <User className="w-5 h-5 text-teal-600" />
+          {/* Total Patient */}
+            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+              <div className={cardColor("Total Patient")}>
+                <User className="w-5 h-5 " />
               </div>
-              <p className="text-2xl font-bold text-gray-800">{card.count}</p>
-              <p className="text-sm font-semibold text-gray-500">{card.title}</p>
+              <p className="text-2xl font-bold text-gray-800">{patients.length}</p>
+              <p className="text-sm font-semibold text-gray-500">Total Patients</p>
             </div>
-          ))}
+            {/* Total critical */}
+            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+              <div className={cardColor("Stable")}>
+                <User className="w-5 h-5 " />
+              </div>
+              <p className="text-2xl font-bold text-gray-800">{TotalStable}</p>
+              <p className="text-sm font-semibold text-gray-500">Stable</p>
+            </div>
+             {/* Total critical */}
+            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+              <div className={cardColor("Monitor")}>
+                <User className="w-5 h-5 " />
+              </div>
+              <p className="text-2xl font-bold text-gray-800">{TotalMonitoring}</p>
+              <p className="text-sm font-semibold text-gray-500">Monitoring</p>
+            </div>
+             {/* Total critical */}
+            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+              <div className={cardColor("Critical")}>
+                <User className="w-5 h-5 " />
+              </div>
+              <p className="text-2xl font-bold text-gray-800">{TotalCritical}</p>
+              <p className="text-sm font-semibold text-gray-500">Critical</p>
+            </div>
+         
         </div>
 
         {/* Table */}
@@ -131,7 +163,7 @@ function Patient() {
                 {filteredPatients.map((p) => (
                   <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ background: "linear-gradient(135deg, #0E7490, #14B8A6)" }}>
+                      <div className="w-9 h-9 rounded-full flex items-center capitalize justify-center text-white text-sm font-bold shrink-0" style={{ background: "linear-gradient(135deg, #0E7490, #14B8A6)" }}>
                         {p.first_name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                       </div>
                       <div>
