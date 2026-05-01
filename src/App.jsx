@@ -14,6 +14,8 @@ import PharmacyPage from "./pages/PharmacyPage";
 import AnalyticsPage from "./components/AnalyticsPage";
 import MessagesPage from "./components/MessagesPage";
 import MedicalRecordPage from "./pages/MedicalRecordPage"
+import PatientBooking from "./pages/patients/PatientBooking";
+import Register from "./pages/Register";
 import './App.css';
 
 function App() {
@@ -27,6 +29,7 @@ function App() {
     <Routes>
       {/* Public login route */}
       <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       {/* Admin routes wrapped in ProtectedRoute and AdminLayout */}
       <Route
@@ -48,6 +51,7 @@ function App() {
         <Route path="report" element={<AnalyticsPage/>} /> {/* /admin/report */}
         <Route path="message" element={<MessagesPage/>} /> {/* /admin/message */}
         <Route path="medical" element={<MedicalRecordPage/>} /> {/* /admin/medical */}
+        <Route path="booking" element={<PatientBooking/>} /> {/* /admin/booking */}
         {/* Add more admin pages here */}
       </Route>
     </Routes>

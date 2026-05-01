@@ -36,7 +36,7 @@ function Sidebar() {
   ];
   const patientMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
-    { icon: Calendar, label: "Appointments", path: "/patient?tab=appointments" },
+    { icon: Calendar, label: "Appointments", path: "/admin/booking" },
     { icon: Activity, label: "Medical Records", path: "/patient?tab=records" },
     { icon: MessageSquare, label: "Messages", path: "/patient?tab=messages" },
     { icon: User, label: "Profile", path: "/patient?tab=profile" },
@@ -123,7 +123,7 @@ function Sidebar() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`
+                `${user?.first_name?.[0] || ""}${user?.last_name?.[0] || ""}`
               )}
             </div>
             <div className="min-w-0">
@@ -131,8 +131,8 @@ function Sidebar() {
                 {user?.role === "admin"
                   ? "Administrator"
                   : user?.role === "doctor"
-                    ? `Dr. ${user?.firstName} ${user?.lastName}`
-                    : `${user?.firstName} ${user?.lastName}`}
+                    ? `Dr. ${user?.first_name} ${user?.first_name}`
+                    : `${user?.first_name} ${user?.last_name}`}
               </p>
               <p className="text-xs text-slate-400 truncate capitalize">{user?.role}</p>
             </div>

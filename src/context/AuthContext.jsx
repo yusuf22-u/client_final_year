@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+console.log("users",user)
   const fetchUser = async () => {
     try {
       const res = await API.get("/users/profile");

@@ -69,7 +69,7 @@ function Navbar() {
             {/* Name + Role */}
             <div className="hidden sm:block">
               <p className="text-sm font-semibold text-slate-700 capitalize">
-                {user?.firstName}
+                {user?.first_name}
               </p>
               <p className="text-xs text-slate-400">
                 {getRole()}

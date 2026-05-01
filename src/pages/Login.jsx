@@ -5,6 +5,7 @@ import {validateEmail, validatePassword  } from "../utils/validators.js";
 import InputField from "../components/forms/InputField"
 import API from "../api/axios.js";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 
 const initialState = {
@@ -203,6 +204,12 @@ window.location.href = "/admin";
 >
   {loading ? "Logging in..." : "Login"}
 </button>
+ <p className="text-sm mt-4 text-center">
+           you dont have an account?{" "}
+            <Link to="/register" className="text-primary font-medium">
+              Create account
+            </Link>
+          </p>
 
     </form>
 

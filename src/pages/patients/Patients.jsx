@@ -167,8 +167,8 @@ function Patient() {
                         {p.first_name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">{p.first_name}</p>
-                        <p className="text-xs text-gray-400">{p.last_name}</p>
+                        <p className="text-sm font-semibold text-gray-800 capitalize">{p.first_name}</p>
+                        <p className="text-xs text-gray-400 capitalize">{p.last_name}</p>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">{calculateAge(p.date_of_birth)} yrs · {p.gender}</td>
