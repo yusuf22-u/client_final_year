@@ -20,18 +20,23 @@ import {
   MessageSquare,
   AlertCircle,
 } from "lucide-react";
- import { formatDate } from "../../helpers/formatDate";
+import { formatDate } from "../../helpers/formatDate";
+import {useAuth} from "../../context/AuthContext"
 export default function PatientBooking() {
-  const [form, setForm] = useState({
-    date: "",
-    time: "",
-    type: "",
-    notes: "",
-  });
+ 
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [showAddModal, setShowAddModal] = useState(false);
+  const {user}=useAuth()
+   const [form, setForm] = useState({
+   
+    date: "",
+    time: "",
+    type: "",
+    notes: ""
+  });
+console.log("usein",user?.id)
   const statusCfg = {
     pending: { label: "Pending", color: "text-yellow-700", bg: "bg-yellow-100" },
     approved: { label: "Approved", color: "text-green-700", bg: "bg-green-100" },
@@ -46,23 +51,24 @@ export default function PatientBooking() {
     e.preventDefault();
 
     try {
-      setLoading(true);
-
       await API.post("/appointments", form);
 
       toast.success("Appointment requested");
 
-      setForm({ date: "", time: "", type: "", notes: "" });
+      setForm({
+        date: "",
+        time: "",
+        type: "",
+        notes: ""
+      });
 
       fetchAppointments();
+      setShowAddModal(false);
+
     } catch (err) {
-      console.error(err);
-      toast.error("Error booking");
-    } finally {
-      setLoading(false);
+      toast.error("Failed");
     }
   };
-
   const fetchAppointments = async () => {
     try {
       const res = await API.get("/appointments/patient");
@@ -90,63 +96,20 @@ export default function PatientBooking() {
           </p>
         </div>
 
-        {/* FORM CARD */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-          >
 
-            <Input
-              type="date"
-              name="date"
-              value={form.date}
-              onChange={handleChange}
-              label="Date"
-            />
-
-            <Input
-              type="time"
-              name="time"
-              value={form.time}
-              onChange={handleChange}
-              label="Time"
-            />
-
-            <Input
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              label="Appointment Type"
-              placeholder="e.g. Consultation"
-              className="sm:col-span-2"
-            />
-
-            <Textarea
-              name="notes"
-              value={form.notes}
-              onChange={handleChange}
-              label="Notes"
-              className="sm:col-span-2"
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="sm:col-span-2 mt-2 bg-cyan-700 hover:bg-cyan-800 text-white py-3 rounded-2xl font-semibold transition"
-            >
-              {loading ? "Booking..." : "Book Appointment"}
-            </button>
-
-          </form>
-        </div>
 
         {/* APPOINTMENTS LIST */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">
-            My Appointments
-          </h2>
-
+          <div className="flex space-x-1 justify-between">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4">
+              My Appointments
+            </h2>
+            <button onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm hover:opacity-90 transition-all"
+              style={{ backgroundColor: "#0E7490", fontWeight: 600, boxShadow: "0 4px 14px rgba(14,116,144,0.3)" }}>
+              <Plus className="w-4 h-4" /> New Appointment
+            </button>
+          </div>
           <div className="space-y-3">
             {appointments.length === 0 && (
               <p className="text-slate-400 text-sm">
@@ -167,7 +130,7 @@ export default function PatientBooking() {
                       {a.type || "General Consultation"}
                     </p>
                     <p className="text-sm text-slate-400">
-                     {formatDate(a.appointment_date)} · {a.appointment_time}
+                      {formatDate(a.appointment_date)} · {a.appointment_time}
                     </p>
                   </div>
 
@@ -181,7 +144,90 @@ export default function PatientBooking() {
             })}
           </div>
         </div>
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-3 sm:px-4 py-6 bg-black/50 backdrop-blur-sm">
 
+            {/* MODAL CONTAINER */}
+            <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[95vh]">
+
+              {/* HEADER (STICKY) */}
+              <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b sticky top-0 bg-white z-10">
+                <h3 className="text-base sm:text-lg font-bold text-slate-800">
+                  Schedule New Appointment
+                </h3>
+
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
+              </div>
+
+              {/* BODY (SCROLLABLE) */}
+              <div className="overflow-y-auto px-5 sm:px-6 py-4 space-y-4">
+
+
+                {/* Notes */}
+                <form onSubmit={handleSubmit}>
+
+                  <input
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleChange}
+                  />
+
+                  <input
+                    type="time"
+                    name="time"
+                    value={form.time}
+                    onChange={handleChange}
+                  />
+
+                  <input
+                    type="text"
+                    name="type"
+                    placeholder="Consultation"
+                    value={form.type}
+                    onChange={handleChange}
+                  />
+
+                  <textarea
+                    name="notes"
+                    value={form.notes}
+                    onChange={handleChange}
+                  />
+
+                  <button type="submit">
+                    Book
+                  </button>
+
+                </form>
+
+              </div>
+
+              {/* FOOTER (STICKY) */}
+              <div className="px-5 sm:px-6 py-4 border-t bg-white flex gap-3 sticky bottom-0">
+
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 rounded-xl bg-cyan-700 text-white text-sm font-semibold hover:bg-cyan-800"
+                >
+                  Schedule
+                </button>
+
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
@@ -189,34 +235,6 @@ export default function PatientBooking() {
 
 /* REUSABLE INPUTS */
 
-function Input({ label, className = "", ...props }) {
-  return (
-    <div className={className}>
-      <label className="block text-sm text-slate-600 mb-1 font-medium">
-        {label}
-      </label>
-      <input
-        {...props}
-        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-cyan-500 focus:bg-white"
-      />
-    </div>
-  );
-}
-
-function Textarea({ label, className = "", ...props }) {
-  return (
-    <div className={className}>
-      <label className="block text-sm text-slate-600 mb-1 font-medium">
-        {label}
-      </label>
-      <textarea
-        {...props}
-        rows={4}
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-cyan-500 focus:bg-white resize-none"
-      />
-    </div>
-  );
-}
 
 /* helper */
 const statusColor = (status) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Calendar,
@@ -26,9 +26,15 @@ import {
   CheckCircle,
   XCircle,
   Eye,
+  X
 } from "lucide-react";
-
-
+import VitalForm from "./VitalForm";
+import API from "../../api/axios";
+import toast from "react-hot-toast";
+import { useParams, Link } from "react-router-dom";
+import { calculateAge } from "../../helpers/calculateAge";
+import { formatDate } from "../../helpers/formatDate"
+import PrescriptionForm from "./PrescriptionForm";
 const patientInfo = {
   id: 1,
   name: "Maria Santos",
@@ -154,22 +160,56 @@ export function MedicalRecordPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddVital, setShowAddVital] = useState(false);
   const [showAddPrescription, setShowAddPrescription] = useState(false);
+  // const [showAddVital, setShowAddVital] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null)
+  // const [patients, setPatients] = useState([]);
+  const [patients, setPatient] = useState(null);
+  const [vitals, setVitals] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const { patient_id } = useParams()
+  console.log("patient_id", patient_id)
+  console.log("prescriptions", prescriptions)
+  const [vitalForm, setVitalForm] = useState({
+    date: "",
+    bp: "",
+    hr: "",
+    temp: "",
+    weight: "",
+    respiratory: "",
+    oxygen: "",
+  });
+  const fetchMedicalRecord = async () => {
+    try {
+      const res = await API.get(`/vitals/medical/${patient_id}`);
+
+      setPatient(res.data.patient);
+      setVitals(res.data.vitals);
+      setPrescriptions(res.data.prescriptions);
+
+    } catch (error) {
+      toast.error("Failed to fetch medical record");
+    }
+  };
+
+  useEffect(() => {
+    fetchMedicalRecord();
+  }, [patient_id]);
 
   const tabs = [
-    { id: "overview" , label: "Overview", icon: User },
-    { id: "vitals" , label: "Vitals", icon: Activity },
-    { id: "prescriptions" , label: "Prescriptions", icon: Pill },
-    { id: "labs" , label: "Lab Results", icon: FileText },
-    { id: "history" , label: "Medical History", icon: Clock },
+    { id: "overview", label: "Overview", icon: User },
+    { id: "vitals", label: "Vitals", icon: Activity },
+    { id: "prescriptions", label: "Prescriptions", icon: Pill },
+    { id: "labs", label: "Lab Results", icon: FileText },
+    { id: "history", label: "Medical History", icon: Clock },
   ];
 
   const latestVitals = vitalHistory[0];
 
   return (
     <div className="min-h-screen flex" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#F8FAFC" }}>
-     
+
       <div className="ml-55 flex-1 flex flex-col min-h-screen">
-        
+
         <main className="flex-1 p-8 mt-6">
           {/* Patient Header */}
           <div className="bg-white rounded-2xl p-6 mb-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
@@ -179,22 +219,22 @@ export function MedicalRecordPage() {
                   <User className="w-10 h-10" style={{ color: "#0E7490" }} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0F172A" }}>{patientInfo.name}</h2>
+                  <h2 className="capitalize" style={{ fontSize: 24, fontWeight: 800, color: "#0F172A" }}>{`${patients?.first_name} ${patients?.last_name}`}</h2>
                   <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
-                    <span>{patientInfo.age} years • {patientInfo.gender}</span>
+                    <span>{calculateAge(patients?.date_of_birth)} years • {patients?.gender}</span>
                     <span>•</span>
                     <span>Blood Type: {patientInfo.bloodType}</span>
                     <span>•</span>
-                    <span>DOB: {patientInfo.dob}</span>
+                    <span>DOB: {formatDate(patients?.date_of_birth)}</span>
                   </div>
                   <div className="flex items-center gap-4 mt-3 text-sm">
                     <div className="flex items-center gap-1.5 text-slate-600">
                       <Phone className="w-4 h-4" />
-                      <span>{patientInfo.phone}</span>
+                      <span>+(220) {patients?.phone}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-slate-600">
                       <Mail className="w-4 h-4" />
-                      <span>{patientInfo.email}</span>
+                      <span>{patients?.email}</span>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
@@ -206,14 +246,14 @@ export function MedicalRecordPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="px-4 py-2 rounded-xl border-2 border-slate-200 flex items-center gap-2 text-slate-700 transition-all hover:bg-slate-50" style={{ fontWeight: 600, fontSize: 13 }}>
+                {/* <button className="px-4 py-2 rounded-xl border-2 border-slate-200 flex items-center gap-2 text-slate-700 transition-all hover:bg-slate-50" style={{ fontWeight: 600, fontSize: 13 }}>
                   <Download className="w-4 h-4" />
                   Export
                 </button>
                 <button className="px-4 py-2 rounded-xl flex items-center gap-2 transition-all" style={{ backgroundColor: "#0E7490", color: "#fff", fontWeight: 600, fontSize: 13 }}>
                   <Edit3 className="w-4 h-4" />
                   Edit Record
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
@@ -307,7 +347,9 @@ export function MedicalRecordPage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A" }}>Vital Signs History</h3>
                 <button
-                  onClick={() => setShowAddVital(true)}
+                  onClick={() => setShowAddVital(true)
+
+                  }
                   className="px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
                   style={{ backgroundColor: "#0E7490", color: "#fff", fontWeight: 600, fontSize: 13 }}
                 >
@@ -329,23 +371,65 @@ export function MedicalRecordPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {vitalHistory.map((vital, idx) => (
-                      <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                        <td className="py-4 px-4 text-sm text-slate-700" style={{ fontWeight: 600 }}>{vital.date}</td>
-                        <td className="py-4 px-4 text-sm text-slate-800">{vital.bp}</td>
-                        <td className="py-4 px-4 text-sm text-slate-800">{vital.hr}</td>
-                        <td className="py-4 px-4 text-sm text-slate-800">{vital.temp}</td>
-                        <td className="py-4 px-4 text-sm text-slate-800">{vital.weight}</td>
-                        <td className="py-4 px-4 text-sm text-slate-800">{vital.respiratory}</td>
-                        <td className="py-4 px-4 text-sm text-slate-800">{vital.oxygen}</td>
+                    {vitals?.length > 0 ? (
+                      vitals.map((vital, idx) => (
+                        <tr
+                          key={idx}
+                          className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
+                        >
+                          <td
+                            className="py-4 px-4 text-sm text-slate-700"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {formatDate(vital?.recorded_at)}
+                          </td>
+                          <td className="py-4 px-4 text-sm text-slate-800">
+                            {vital?.blood_pressure}
+                          </td>
+                          <td className="py-4 px-4 text-sm text-slate-800">
+                            {vital?.heart_rate}
+                          </td>
+                          <td className="py-4 px-4 text-sm text-slate-800">
+                            {vital?.temperature}
+                          </td>
+                          <td className="py-4 px-4 text-sm text-slate-800">
+                            {vital?.weight}
+                          </td>
+                          <td className="py-4 px-4 text-sm text-slate-800">
+                            {vital?.respiratory_rate}
+                          </td>
+                          <td className="py-4 px-4 text-sm text-slate-800">
+                            {vital?.oxygen_saturation}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan="7"
+                          className="py-10 text-center text-slate-400 text-sm"
+                        >
+                          No vital records yet
+                        </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          )}
 
+          )}
+          {showAddVital && (
+            <VitalForm
+              setVitalForm={setVitalForm}
+              vitalForm={vitalForm}
+              setShowAddVital={setShowAddVital}
+              patient_id={patient_id}
+              onSuccess={fetchMedicalRecord}
+            // setVitalHistory={setVitalHistory}
+
+            />
+          )}
           {/* Prescriptions Tab */}
           {activeTab === "prescriptions" && (
             <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
@@ -368,7 +452,7 @@ export function MedicalRecordPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h4 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A" }}>{rx.drug}</h4>
+                            <h4 className="capitalize" style={{ fontSize: 16, fontWeight: 700, color: "#0F172A" }}>{rx.drug}</h4>
                             <div className="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1" style={{ backgroundColor: cfg.bg, color: cfg.color, fontWeight: 600 }}>
                               <cfg.icon className="w-3 h-3" />
                               {cfg.label}
@@ -379,16 +463,16 @@ export function MedicalRecordPage() {
                               <span className="text-slate-500">Dose:</span> <span className="font-semibold">{rx.dose}</span>
                             </div>
                             <div>
-                              <span className="text-slate-500">Frequency:</span> <span className="font-semibold">{rx.frequency}</span>
+                              <span className="text-slate-500 capitalize">Frequency:</span> <span className="font-semibold  capitalize">{rx.frequency}</span>
                             </div>
                             <div>
-                              <span className="text-slate-500">Prescribed by:</span> <span className="font-semibold">{rx.prescribedBy}</span>
+                              <span className="text-slate-500 capitalize">Prescribed by:</span> <span className="font-semibold capitalize">Dr. {rx.prescribed_by}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-                            <span>Start: {rx.startDate}</span>
+                            <span>Start: {formatDate(rx.start_date)}</span>
                             <span>•</span>
-                            <span>End: {rx.endDate}</span>
+                            <span>End: {formatDate(rx.end_date)}</span>
                           </div>
                         </div>
                         <button className="p-2 rounded-lg hover:bg-slate-100 transition-all">
@@ -401,7 +485,18 @@ export function MedicalRecordPage() {
               </div>
             </div>
           )}
-
+         {/* prescription form */}
+         {
+          showAddPrescription && (
+            <PrescriptionForm
+            patient_id={patient_id}
+            setShowAddPrescription={setShowAddPrescription}
+            onSuccess={fetchMedicalRecord}
+            
+           
+            />
+          )
+         }
           {/* Lab Results Tab */}
           {activeTab === "labs" && (
             <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>

@@ -2,19 +2,29 @@ import React, { useState, useEffect } from "react";
 import PatientForm from "../../components/PatientForm";
 import API from "../../api/axios";
 import toast from "react-hot-toast";
-import { User, Search, Plus, Eye, Edit3 } from "lucide-react";
+import { User, Search, Plus, Eye, Edit3, X } from "lucide-react";
 import ViewPatientModal from "../../components/ViewPatientModal";
+
+import AssignDoctor from "./AssignDoctor";
 
 function Patient() {
   const [patients, setPatients] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [viewPatient, setViewPatient] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [assignModal, setAssignModal] = useState(false);
 
-  // console.log("patients",patients)
+  const [form, setForm] = useState({
+    doctor_id: "",
+    condition_state: "",
+    status: "stable",
+    notes: ""
+  });
+
 
 
   const calculateAge = (dob) => {
@@ -45,25 +55,32 @@ function Patient() {
   }, []);
 
 
+  const filteredPatients = patients.filter((p) => {
+    const firstName = p.first_name?.toLowerCase() || "";
+    const lastName = p.last_name?.toLowerCase() || "";
+    const status = p.status?.toLowerCase() || "";
 
-  const filteredPatients = patients.filter(
-    (p) =>
-      (filterStatus === "all" || p.status === filterStatus) &&
-      (p.first_name.toLowerCase().includes(search.toLowerCase()) ||
-        p.last_name.toLowerCase().includes(search.toLowerCase()) ||
-        p.status.toLowerCase().includes(search.toLowerCase()))
-  );
+    return (
+      (filterStatus === "all" || status === filterStatus) &&
+      (
+        firstName.includes(search.toLowerCase()) ||
+        lastName.includes(search.toLowerCase()) ||
+        status.includes(search.toLowerCase())
+      )
+    );
+  });
   // card color
-  const cardColor=(status)=>{
-    if(status==="Stable") return "rounded-lg bg-teal-100 mb-3 text-teal-600 w-12 h-12 flex items-center justify-center";
-    if(status==="Critical") return "rounded-lg bg-red-100 mb-3 text-red-600 w-12 h-12 flex items-center justify-center";
-    if(status==="Monitor") return "rounded-lg bg-yellow-100 mb-3 text-yellow-600 w-12 h-12 flex items-center justify-center";
-    if(status==="Total Patient") return "rounded-lg bg-blue-100 mb-3 text-blue-600 w-12 h-12 flex items-center justify-center";
-    
+  const cardColor = (status) => {
+    if (status === "Stable") return "rounded-lg bg-teal-100 mb-3 text-teal-600 w-12 h-12 flex items-center justify-center";
+    if (status === "Critical") return "rounded-lg bg-red-100 mb-3 text-red-600 w-12 h-12 flex items-center justify-center";
+    if (status === "Monitor") return "rounded-lg bg-yellow-100 mb-3 text-yellow-600 w-12 h-12 flex items-center justify-center";
+    if (status === "Total Patient") return "rounded-lg bg-blue-100 mb-3 text-blue-600 w-12 h-12 flex items-center justify-center";
+
   }
-  const TotalStable=patients.filter((p)=>(p.status==="stable")).length
-  const TotalCritical=patients.filter((p)=>(p.status==="critical")).length
-  const TotalMonitoring=patients.filter((p)=>(p.status==="monitoring")).length
+  const TotalStable = patients.filter((p) => (p.status === "stable")).length
+  const TotalCritical = patients.filter((p) => (p.status === "critical")).length
+  const TotalMonitoring = patients.filter((p) => (p.status === "monitoring")).length
+
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-inter">
@@ -71,38 +88,38 @@ function Patient() {
       <main className="flex justify-center flex-col ml-64 mt-12 ">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           {/* Total Patient */}
-            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
-              <div className={cardColor("Total Patient")}>
-                <User className="w-5 h-5 " />
-              </div>
-              <p className="text-2xl font-bold text-gray-800">{patients.length}</p>
-              <p className="text-sm font-semibold text-gray-500">Total Patients</p>
+          <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+            <div className={cardColor("Total Patient")}>
+              <User className="w-5 h-5 " />
             </div>
-            {/* Total critical */}
-            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
-              <div className={cardColor("Stable")}>
-                <User className="w-5 h-5 " />
-              </div>
-              <p className="text-2xl font-bold text-gray-800">{TotalStable}</p>
-              <p className="text-sm font-semibold text-gray-500">Stable</p>
+            <p className="text-2xl font-bold text-gray-800">{patients.length}</p>
+            <p className="text-sm font-semibold text-gray-500">Total Patients</p>
+          </div>
+          {/* Total critical */}
+          <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+            <div className={cardColor("Stable")}>
+              <User className="w-5 h-5 " />
             </div>
-             {/* Total critical */}
-            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
-              <div className={cardColor("Monitor")}>
-                <User className="w-5 h-5 " />
-              </div>
-              <p className="text-2xl font-bold text-gray-800">{TotalMonitoring}</p>
-              <p className="text-sm font-semibold text-gray-500">Monitoring</p>
+            <p className="text-2xl font-bold text-gray-800">{TotalStable}</p>
+            <p className="text-sm font-semibold text-gray-500">Stable</p>
+          </div>
+          {/* Total critical */}
+          <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+            <div className={cardColor("Monitor")}>
+              <User className="w-5 h-5 " />
             </div>
-             {/* Total critical */}
-            <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
-              <div className={cardColor("Critical")}>
-                <User className="w-5 h-5 " />
-              </div>
-              <p className="text-2xl font-bold text-gray-800">{TotalCritical}</p>
-              <p className="text-sm font-semibold text-gray-500">Critical</p>
+            <p className="text-2xl font-bold text-gray-800">{TotalMonitoring}</p>
+            <p className="text-sm font-semibold text-gray-500">Monitoring</p>
+          </div>
+          {/* Total critical */}
+          <div className="bg-white p-4 rounded-2xl shadow flex flex-col items-left">
+            <div className={cardColor("Critical")}>
+              <User className="w-5 h-5 " />
             </div>
-         
+            <p className="text-2xl font-bold text-gray-800">{TotalCritical}</p>
+            <p className="text-sm font-semibold text-gray-500">Critical</p>
+          </div>
+
         </div>
 
         {/* Table */}
@@ -150,8 +167,7 @@ function Patient() {
                     "Age / Gender",
                     "Condition",
                     "Assigned Doctor",
-                    "Last Visit",
-                    "Next Visit",
+                    "Primary Condition",
                     "Status",
                     "Actions",
                   ].map((h) => (
@@ -173,12 +189,20 @@ function Patient() {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">{calculateAge(p.date_of_birth)} yrs · {p.gender}</td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-700">{p.address}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">Dr. Darboe</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{p.lastVisit}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{p.nextVisit}</td>
+                    <td className="text-sm font-semibold text-gray-800 capitalize flex flex-col">
+                      {p.doctor_id
+                        ? `Dr. ${p.doctor_first_name} ${p.doctor_last_name}`
+                        : "Not Assigned"}
+
+                      <span className="text-gray-400">
+                        {p.specialty || ""}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500 capitalize">{p.condition_state ? p.condition_state : "not stated"}</td>
+                    {/* <td className="px-4 py-3 text-sm text-gray-500">{p.nextVisit}</td> */}
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${p.status === "stable" ? "bg-green-100 text-green-600" : p.status === "critical" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-600"}`}>
-                        {p.status}
+                      <span className={`px-2 py-1 rounded-lg w-full capitalize text-xs font-semibold ${p.status === "stable" ? "bg-green-100 text-green-600" : p.status === "critical" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-600"}`}>
+                        {p.status ? p.status : "No status"}
                       </span>
                     </td>
                     <td className="px-4 py-3 flex items-center gap-2">
@@ -199,6 +223,15 @@ function Patient() {
                         className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center hover:border-gray-300 hover:bg-gray-50 transition-colors"
                       >
                         <Edit3 className="w-3.5 h-3.5 text-gray-400" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedPatient(p);
+                          setAssignModal(true);
+                        }}
+                        className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                      >
+                        <User className="w-3.5 h-3.5 text-gray-400" />
                       </button>
                     </td>
                   </tr>
@@ -230,7 +263,7 @@ function Patient() {
 
           />
         )}
-        
+
 
         {showViewModal && (
           <ViewPatientModal
@@ -242,6 +275,16 @@ function Patient() {
           />
         )}
 
+        {assignModal && (
+          <AssignDoctor
+            selectedPatient={selectedPatient}
+            setAssignModal={setAssignModal}
+            setForm={setForm}
+            form={form}
+            onSuccess={fetchPatients}
+          />
+
+        )}
       </main>
 
     </div>

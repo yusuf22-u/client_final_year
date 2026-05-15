@@ -1,6 +1,6 @@
 // DoctorDashboard.jsx
 
-import React,{useState} from "react";
+
 import {
   Users,
   CalendarDays,
@@ -11,13 +11,32 @@ import {
   Edit3
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import API from "../api/axios";
+import React, {useEffect,useState} from "react";
+import { Link } from "react-router-dom";
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
    const [selectedPatient, setSelectedPatient] = useState(null);
   const [activeTab, setActiveTab] = useState();
   const [showModal, setShowModal] = useState(false);
+  const [patients, setPatients] = useState([]);
+
+
   // ADD this helper above return()
+ useEffect(() => {
+  const fetchAssignPatient = async () => {
+    try {
+      const res = await API.get("/staff/assign-patients");
+      console.log("assign patient", res.data);
+      setPatients(res.data)
+    } catch (error) {
+      console.log("error", error?.response?.data || error.message);
+    }
+  };
+
+  fetchAssignPatient();
+}, []);
 
 const statusClass = (status) => {
   if (status === "stable")
@@ -32,15 +51,7 @@ const statusClass = (status) => {
   return "px-3 py-1 rounded-full text-xs bg-cyan-100 text-cyan-700";
 };
 
-  const patients = [
-  { id: 1, name: "Maria Santos", age: 52, condition: "Hypertension", status: "stable" },
-  { id: 2, name: "Carlos Reyes", age: 34, condition: "Type 2 Diabetes", status: "monitoring" },
-  { id: 3, name: "Elena Kim", age: 67, condition: "Coronary Artery Disease", status: "critical" },
-  { id: 4, name: "James Liu", age: 45, condition: "Asthma", status: "stable" },
-  { id: 5, name: "Anna Petrov", age: 29, condition: "Anxiety & Depression", status: "improving" },
-  { id: 6, name: "Roberto Cruz", age: 71, condition: "COPD", status: "monitoring" },
-  { id: 7, name: "Fatima Al-Hassan", age: 38, condition: "Lupus", status: "stable" },
-];
+ 
 
   
 // FIXED DoctorDashboard.jsx
@@ -62,7 +73,7 @@ return (
             </p>
 
             <h1 className="text-2xl sm:text-4xl font-bold mt-1">
-              Dr. {user?.firstName} {user?.lastName}
+              Dr. {user?.first_name} {user?.last_name}
             </h1>
 
             <p className="mt-2 text-sm sm:text-lg text-white/90">
@@ -83,7 +94,7 @@ return (
           icon={<Users size={22} />}
           iconBg="bg-cyan-100"
           iconColor="text-cyan-700"
-          value="38"
+          value={patients.length}
           title="Assigned Patients"
           subtitle="Active cases"
         />
@@ -149,18 +160,18 @@ return (
             <tbody>
               {patients.map((p) => (
                 <tr
-                  key={p.id}
+                  key={p.patient_id}
                   className="border-b border-slate-100 hover:bg-slate-50 transition"
                 >
                   {/* NAME */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-cyan-700 text-white text-xs font-bold flex items-center justify-center">
-                        {p.name.charAt(0)}
+                      <div className="w-9 h-9 capitalize rounded-full bg-cyan-700 text-white text-xs font-bold flex items-center justify-center">
+                        {p.first_name.charAt(0)} {p.last_name.charAt(0)}
                       </div>
 
-                      <span className="text-sm font-medium text-slate-700">
-                        {p.name}
+                      <span className="text-sm font-medium capitalize text-slate-700">
+                        {`${p.first_name} ${p.last_name}`}
                       </span>
                     </div>
                   </td>
@@ -172,7 +183,7 @@ return (
 
                   {/* CONDITION */}
                   <td className="px-5 py-4 text-sm text-slate-600">
-                    {p.condition}
+                    {p.condition_state}
                   </td>
 
                   {/* STATUS */}
@@ -186,16 +197,12 @@ return (
                   <td className="px-5 py-4">
                     <div className="flex gap-2">
 
-                      <button
-                        onClick={() => {
-                          setSelectedPatient(p.id);
-                          setActiveTab(0);
-                          setShowModal(true);
-                        }}
+                      <Link to={`/admin/medical/${p.patient_id}`}
+                       
                         className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs flex items-center gap-1 hover:bg-slate-50"
                       >
                         <Eye size={14} /> View
-                      </button>
+                      </Link>
 
                       <button
                         onClick={() => {
@@ -205,7 +212,7 @@ return (
                         }}
                         className="px-3 py-2 rounded-xl bg-cyan-700 text-white text-xs flex items-center gap-1 hover:bg-cyan-800"
                       >
-                        <Edit3 size={14} /> Update
+                        <Edit3 size={14} /> Updateg
                       </button>
 
                     </div>

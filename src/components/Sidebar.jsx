@@ -43,11 +43,11 @@ function Sidebar() {
   ];
   const doctorMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
-    { icon: Users, label: "Assigned Patients", path: "/doctor?tab=patients" },
+    { icon: Users, label: "Assigned Patients", path: "/admin/assign-patient" },
     { icon: Calendar, label: "Appointments", path: "/doctor?tab=appointments" },
-    { icon: FileText, label: "Medical Records", path: "/admin/medical " },
+    // { icon: FileText, label: "Medical Records", path: "/admin/medical/:patient_id" },
     { icon: MessageSquare, label: "Messages", path: "/doctor?tab=messages" },
-    { icon: User, label: "Profile", path: "/doctor?tab=profile" },
+    { icon: User, label: "Profile", path: "/admin/user-account" },
   ];
   useEffect(() => {
     if (user?.role === "admin") {
@@ -131,7 +131,7 @@ function Sidebar() {
                 {user?.role === "admin"
                   ? "Administrator"
                   : user?.role === "doctor"
-                    ? `Dr. ${user?.first_name} ${user?.first_name}`
+                    ? `Dr. ${user?.first_name} ${user?.last_name}`
                     : `${user?.first_name} ${user?.last_name}`}
               </p>
               <p className="text-xs text-slate-400 truncate capitalize">{user?.role}</p>

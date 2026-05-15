@@ -36,8 +36,9 @@ function Staff() {
     const fetchStaff = async () => {
         try {
             const res = await API.get("/staff");
-            setStaff(res.data.data);
-            setFiltered(res.data.data);
+            console.log("doctor",res.data)
+            setStaff(res.data);
+            setFiltered(res.data);
         } catch (error) {
             toast.error("Failed to fetch staff");
         }
@@ -52,7 +53,7 @@ function Staff() {
         let data = [...staff];
 
         if (role !== "All Roles") {
-            data = data.filter((item) => item.role === role);
+            data = data.filter((item) => item.role === role.toLocaleUpperCase());
         }
 
         if (search) {
@@ -97,7 +98,7 @@ function Staff() {
         return "bg-gray-100 text-gray-600";
     };
     // filters
-    const totalDoctor = staff.filter(s => s.role === "doctor").length
+    const totalDoctor = staff.filter(s => s.role === "Doctor").length
     const totalNurse = staff.filter(s => s.role === "Nurse").length
     const totalStatus = staff.filter(s => s.status === "Inactive").length
 
@@ -228,16 +229,12 @@ function Staff() {
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-11 h-11 rounded-full uppercase bg-cyan-600 text-white flex items-center justify-center font-bold">
-                                                {item.full_name
-                                                    .split(" ")
-                                                    .map((n) => n[0])
-                                                    .slice(0, 2)
-                                                    .join("")}
+                                                {item.first_name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                                             </div>
 
                                             <div>
                                                 <p className="font-semibold text-slate-800 capitalize">
-                                                    {item.full_name}
+                                                    {item.first_name}  {item.last_name}
                                                 </p>
                                                 <p className="text-sm text-slate-400">
                                                     {item.email}

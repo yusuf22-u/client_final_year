@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from "react";
 import API from "../api/axios.js";
 import {
-  Search,
-  Filter,
-  Plus,
-  Eye,
-  Edit3,
-  Trash2,
-  X,
-  User,
-  Phone,
-  MapPin,
-  Calendar,
-  Droplets,
-  AlertTriangle,
-  HeartPulse,
-  FileText,
-  Pill,
-  Clock,
-  ChevronRight,
-  Thermometer,
-  Activity,
-  Mail,
+    Search,
+    Filter,
+    Plus,
+    Eye,
+    Edit3,
+    Trash2,
+    X,
+    User,
+    Phone,
+    MapPin,
+    Calendar,
+    Droplets,
+    AlertTriangle,
+    HeartPulse,
+    FileText,
+    Pill,
+    Clock,
+    ChevronRight,
+    Thermometer,
+    Activity,
+    Mail,
 } from "lucide-react";
 
 function ViewPatientModal({ patient, onClose, onEdit }) {
@@ -132,7 +132,7 @@ function ViewPatientModal({ patient, onClose, onEdit }) {
                         </div>
 
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-800">
+                            <h2 className="text-lg font-semibold text-slate-800 capitalize">
                                 {patient.first_name} {patient.last_name}
                             </h2>
                             <p className="text-sm text-slate-400">
@@ -221,12 +221,14 @@ function ViewPatientModal({ patient, onClose, onEdit }) {
                                     <InfoRow
                                         Icon={HeartPulse}
                                         label="Primary Condition"
-                                        value={patient.condition}
+                                        value={patient.condition_state?patient.condition_state:"N/A"}
                                     />
                                     <InfoRow
                                         Icon={User}
                                         label="Assigned Doctor"
-                                        value="Dr. Darboe"
+                                        value={patient.doctor_id
+                                            ? `Dr. ${patient.doctor_first_name} ${patient.doctor_last_name}`
+                                            : "Not Assigned"}
                                     />
                                     <InfoRow
                                         Icon={Calendar}
@@ -249,7 +251,7 @@ function ViewPatientModal({ patient, onClose, onEdit }) {
                         </div>
                     )}
 
-                  
+
                     {/* ✅ VITALS */}
                     {activeTab === "vitals" && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

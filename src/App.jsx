@@ -13,10 +13,12 @@ import AppointmentsPage from "./pages/AppointmentsPage";
 import PharmacyPage from "./pages/PharmacyPage";
 import AnalyticsPage from "./components/AnalyticsPage";
 import MessagesPage from "./components/MessagesPage";
-import MedicalRecordPage from "./pages/MedicalRecordPage"
+import MedicalRecordPage from "./pages/patients/MedicalRecordPage"
 import PatientBooking from "./pages/patients/PatientBooking";
+import AssignPatient from "./pages/patients/AssignPatient";
 import Register from "./pages/Register";
 import './App.css';
+import { UserAccountPage } from "./pages/UserAccountPage";
 
 function App() {
   const { loading } = useAuth();
@@ -50,8 +52,10 @@ function App() {
         <Route path="pharmacy" element={<PharmacyPage/>} /> {/* /admin/pharmacy */}
         <Route path="report" element={<AnalyticsPage/>} /> {/* /admin/report */}
         <Route path="message" element={<MessagesPage/>} /> {/* /admin/message */}
-        <Route path="medical" element={<MedicalRecordPage/>} /> {/* /admin/medical */}
+        <Route path="medical/:patient_id" element={<MedicalRecordPage/>} /> {/* /admin/medical */}
         <Route path="booking" element={<PatientBooking/>} /> {/* /admin/booking */}
+        <Route path="user-account" element={<UserAccountPage/>} /> {/* /user-account/booking */}
+        <Route path="assign-patient" element={<AssignPatient/>} /> {/* /admin/assign-patient */}
         {/* Add more admin pages here */}
       </Route>
     </Routes>
