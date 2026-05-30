@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import {
   Search,
   Bell,
@@ -8,15 +8,53 @@ import {
   Settings,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import API from "../api/axios";
+
 
 function Navbar() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+ 
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notification, setNotification] = useState([]);
+  const notifRef = useRef(null);
 
   const getInitials = () => {
     return `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`;
   };
+  // fetch the notification
+  useEffect(() => {
+    const fetchNotification = async () => {
+      try {
+        const res = await API.get("/notifications")
+        setNotification(res.data)
+        console.log("notify", res.data)
+      } catch (error) {
+        console.log("error", error)
+      }
+    }
+    fetchNotification()
+  }, [])
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setNotificationOpen(false);
+      }
+    };
 
+    if (notificationOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationOpen]);
+  const getTotalNotification = () => {
+    const notifyCount = notification.filter((notify) => notify.is_read === 0).length
+    return notifyCount
+  }
+  console.log("notify", getTotalNotification())
   const getRole = () => {
     if (user?.role === "admin") return "Administrator";
     if (user?.role === "doctor") return "Doctor";
@@ -27,7 +65,7 @@ function Navbar() {
       <header className="h-16  bg-white border-b border-slate-100 flex items-center justify-between px-8 sticky top-0 z-40"
       >
         <h1 className="text-slate-700">Admin Dashboard</h1>
-        <h2 className="text-slate-800" style={{ fontSize: 18, fontWeight: 700 }}> {user.role==="patient"?"My Health Portal":user.role==="admin"?"Admin Dashboard":"Doctor Dashboard"}</h2>
+        <h2 className="text-slate-800" style={{ fontSize: 18, fontWeight: 700 }}> {user.role === "patient" ? "My Health Portal" : user.role === "admin" ? "Admin Dashboard" : "Doctor Dashboard"}</h2>
         {/* RIGHT SIDE */}
         <div className="flex items-center space-x-4">
 
@@ -42,10 +80,68 @@ function Navbar() {
           </div>
 
           {/* Notification */}
-          <button className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-            <Bell className="w-4 h-4 text-slate-500" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500"></span>
-          </button>
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setNotificationOpen(!notificationOpen)}
+              className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100"
+            >
+              <Bell className="w-4 h-4 text-slate-500" />
+
+              {getTotalNotification() > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs"
+                  style={{ backgroundColor: "#EF4444" }}
+                >
+                  {getTotalNotification() > 9 ? "9+" : getTotalNotification()}
+                </span>
+              )}
+            </button>
+
+            {notificationOpen && (
+              <div
+                className="absolute right-0 top-full mt-2 bg-white rounded-xl border border-slate-100 z-50"
+                style={{
+                  width: "350px",
+                  maxHeight: "450px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
+                }}
+              >
+                <div className="p-4 border-b">
+                  <h3 className="font-bold text-slate-700">
+                    Notifications
+                  </h3>
+                </div>
+
+                <div className="max-h-80 overflow-y-auto">
+                  {notification.length === 0 ? (
+                    <div className="p-6 text-center text-slate-400">
+                      No notifications
+                    </div>
+                  ) : (
+                    notification.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`p-4 border-b hover:bg-slate-50 ${item.is_read === 0 ? "bg-blue-50" : ""
+                          }`}
+                      >
+                        <h4 className="font-semibold text-sm">
+                          {item.title}
+                        </h4>
+
+                        <p className="text-sm text-slate-500">
+                          {item.message}
+                        </p>
+
+                        <p className="text-xs text-slate-400 mt-1">
+                          {new Date(item.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* PROFILE */}
           <div className="flex items-center gap-2 relative">

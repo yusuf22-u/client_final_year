@@ -21,22 +21,22 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { formatDate } from "../../helpers/formatDate";
-import {useAuth} from "../../context/AuthContext"
+import { useAuth } from "../../context/AuthContext"
 export default function PatientBooking() {
- 
 
+  const token = localStorage.getItem("token")
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const {user}=useAuth()
-   const [form, setForm] = useState({
-   
+  const { user } = useAuth()
+  const [form, setForm] = useState({
+
     date: "",
     time: "",
     type: "",
     notes: ""
   });
-console.log("usein",user?.id)
+  console.log("usein", user?.id)
   const statusCfg = {
     pending: { label: "Pending", color: "text-yellow-700", bg: "bg-yellow-100" },
     approved: { label: "Approved", color: "text-green-700", bg: "bg-green-100" },
@@ -71,8 +71,15 @@ console.log("usein",user?.id)
   };
   const fetchAppointments = async () => {
     try {
-      const res = await API.get("/appointments/patient");
+      const res = await API.get("/appointments/patient", {
+
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+
+      });
       setAppointments(res.data);
+      console.log("apoint", res.data)
     } catch (err) {
       console.error(err);
     }
@@ -145,86 +152,111 @@ console.log("usein",user?.id)
           </div>
         </div>
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-3 sm:px-4 py-6 bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
 
-            {/* MODAL CONTAINER */}
-            <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[95vh]">
-
-              {/* HEADER (STICKY) */}
-              <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b sticky top-0 bg-white z-10">
-                <h3 className="text-base sm:text-lg font-bold text-slate-800">
-                  Schedule New Appointment
-                </h3>
+              {/* HEADER */}
+              <div className="flex items-center justify-between px-6 py-5 border-b bg-white sticky top-0 z-10">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800">
+                    Schedule Appointment
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Create a new appointment request
+                  </p>
+                </div>
 
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200"
+                  className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition"
                 >
-                  <X className="w-4 h-4 text-slate-500" />
+                  <X className="w-5 h-5 text-slate-600" />
                 </button>
               </div>
 
-              {/* BODY (SCROLLABLE) */}
-              <div className="overflow-y-auto px-5 sm:px-6 py-4 space-y-4">
+              {/* BODY */}
+              <form
+                onSubmit={handleSubmit}
+                className="overflow-y-auto px-6 py-6 space-y-6"
+              >
+                {/* Date + Time */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Appointment Date
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={form.date}
+                      onChange={handleChange}
+                      className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                    />
+                  </div>
 
-                {/* Notes */}
-                <form onSubmit={handleSubmit}>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Appointment Time
+                    </label>
+                    <input
+                      type="time"
+                      name="time"
+                      value={form.time}
+                      onChange={handleChange}
+                      className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
 
-                  <input
-                    type="date"
-                    name="date"
-                    value={form.date}
-                    onChange={handleChange}
-                  />
-
-                  <input
-                    type="time"
-                    name="time"
-                    value={form.time}
-                    onChange={handleChange}
-                  />
-
+                {/* Type */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Appointment Type
+                  </label>
                   <input
                     type="text"
                     name="type"
-                    placeholder="Consultation"
+                    placeholder="e.g Consultation"
                     value={form.type}
                     onChange={handleChange}
+                    className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
                   />
+                </div>
 
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Additional Notes
+                  </label>
                   <textarea
                     name="notes"
+                    rows="5"
+                    placeholder="Describe symptoms or reason for appointment..."
                     value={form.notes}
                     onChange={handleChange}
+                    className="w-full border border-slate-300 rounded-xl px-4 py-3 resize-none focus:ring-2 focus:ring-cyan-500 focus:outline-none"
                   />
+                </div>
 
-                  <button type="submit">
-                    Book
+                {/* FOOTER */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="flex-1 py-3 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition"
+                  >
+                    Cancel
                   </button>
 
-                </form>
-
-              </div>
-
-              {/* FOOTER (STICKY) */}
-              <div className="px-5 sm:px-6 py-4 border-t bg-white flex gap-3 sticky bottom-0">
-
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-3 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-3 rounded-xl bg-cyan-700 text-white text-sm font-semibold hover:bg-cyan-800"
-                >
-                  Schedule
-                </button>
-
-              </div>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 rounded-xl bg-cyan-700 text-white font-semibold hover:bg-cyan-800 transition shadow-md"
+                  >
+                    Book Appointment
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

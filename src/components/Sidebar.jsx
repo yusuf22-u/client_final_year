@@ -37,14 +37,14 @@ function Sidebar() {
   const patientMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
     { icon: Calendar, label: "Appointments", path: "/admin/booking" },
-    { icon: Activity, label: "Medical Records", path: "/patient?tab=records" },
+    { icon: Activity, label: "Medical Records", path: "/admin/my-medical-record" },
     { icon: MessageSquare, label: "Messages", path: "/patient?tab=messages" },
-    { icon: User, label: "Profile", path: "/patient?tab=profile" },
+    { icon: User, label: "Profile", path: "/admin/my-profile" },
   ];
   const doctorMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
     { icon: Users, label: "Assigned Patients", path: "/admin/assign-patient" },
-    { icon: Calendar, label: "Appointments", path: "/doctor?tab=appointments" },
+    { icon: Calendar, label: "Appointments", path: "/admin/doctor-appointments" },
     // { icon: FileText, label: "Medical Records", path: "/admin/medical/:patient_id" },
     { icon: MessageSquare, label: "Messages", path: "/doctor?tab=messages" },
     { icon: User, label: "Profile", path: "/admin/user-account" },

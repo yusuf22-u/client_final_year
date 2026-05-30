@@ -19,6 +19,9 @@ import AssignPatient from "./pages/patients/AssignPatient";
 import Register from "./pages/Register";
 import './App.css';
 import { UserAccountPage } from "./pages/UserAccountPage";
+import {Profile} from "./pages/patients/Profile"
+import PatientMedicalRecord from "./pages/patients/PatientMedicalRecord"
+import DoctorAppt from "./pages/staff/DoctorAppt";
 
 function App() {
   const { loading } = useAuth();
@@ -56,6 +59,10 @@ function App() {
         <Route path="booking" element={<PatientBooking/>} /> {/* /admin/booking */}
         <Route path="user-account" element={<UserAccountPage/>} /> {/* /user-account/booking */}
         <Route path="assign-patient" element={<AssignPatient/>} /> {/* /admin/assign-patient */}
+        <Route path="my-profile" element={<Profile/>} /> {/* /admin/assign-patient */}
+        <Route path="my-medical-record" element={<PatientMedicalRecord/>} /> {/* /admin/my-medical-record */}
+        <Route path="doctor-appointments" element={<DoctorAppt/>} /> {/* /admin/doctor-appointments */}
+        
         {/* Add more admin pages here */}
       </Route>
     </Routes>

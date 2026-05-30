@@ -9,11 +9,14 @@ import {
     Edit3
 } from "lucide-react";
 import API from "../../api/axios";
+import AppointModal from "../staff/AppointModal";
 
 
 const AssignPatient = () => {
     const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
+    const [showModal, setShowModal] = useState(false)
+
 
 
 
@@ -126,7 +129,11 @@ const AssignPatient = () => {
                                             <td className="px-5 py-4">
                                                 <div className="flex gap-2">
 
-                                                    <button to={`/admin/medical/${p.patient_id}`}
+                                                    <button onClick={() => {
+                                                        setSelectedPatient(p);
+                                                        // setActiveTab("Medical Notes");
+                                                        setShowModal(true);
+                                                    }}
 
                                                         className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs flex items-center gap-1 hover:bg-slate-50"
                                                     >
@@ -154,6 +161,14 @@ const AssignPatient = () => {
                         </div>
                     </div>
                 </div>
+                {/*Show modal details  */}
+                {showModal && (
+                    <AppointModal
+                        selectedItem={selectedPatient}
+                       setShowDetail={setShowModal}
+                        setSelectedItem={setSelectedPatient}
+                    />
+                )}
             </main>
         </>
     )
