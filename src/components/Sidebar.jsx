@@ -118,7 +118,7 @@ function Sidebar() {
             >
               {user?.profile_image ? (
                 <img
-                  src={`http://localhost:4000/uploads/${user.profile_image}`}
+                  src={`https://backend-final-year-api.onrender.com/uploads/${user.profile_image}`}
                   alt="profile"
                   className="w-full h-full object-cover"
                 />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Search,
   Bell,
@@ -14,7 +14,7 @@ import API from "../api/axios";
 function Navbar() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
- 
+
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notification, setNotification] = useState([]);
   const notifRef = useRef(null);
@@ -153,7 +153,7 @@ function Navbar() {
             >
               {user?.profile_image ? (
                 <img
-                  src={`http://localhost:4000/uploads/${user.profile_image}`}
+                  src={`https://backend-final-year-api.onrender.com/uploads/${user.profile_image}`}
                   alt="profile"
                   className="w-full h-full object-cover"
                 />
