@@ -6,35 +6,37 @@ import {
   LogOut,
   User,
   Settings,
+  Menu,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import API from "../api/axios";
 
-
-function Navbar() {
+function Navbar({ setSidebarOpen }) {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
 
+  const [open, setOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notification, setNotification] = useState([]);
+
   const notifRef = useRef(null);
 
   const getInitials = () => {
-    return `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`;
+    return `${user?.first_name?.[0] || ""}${user?.last_name?.[0] || ""}`;
   };
-  // fetch the notification
+
   useEffect(() => {
     const fetchNotification = async () => {
       try {
-        const res = await API.get("/notifications")
-        setNotification(res.data)
-        console.log("notify", res.data)
+        const res = await API.get("/notifications");
+        setNotification(res.data);
       } catch (error) {
-        console.log("error", error)
+        console.log(error);
       }
-    }
-    fetchNotification()
-  }, [])
+    };
+
+    fetchNotification();
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
@@ -50,32 +52,54 @@ function Navbar() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [notificationOpen]);
+
   const getTotalNotification = () => {
-    const notifyCount = notification.filter((notify) => notify.is_read === 0).length
-    return notifyCount
-  }
-  console.log("notify", getTotalNotification())
+    return notification.filter((notify) => notify.is_read === 0).length;
+  };
+
   const getRole = () => {
     if (user?.role === "admin") return "Administrator";
     if (user?.role === "doctor") return "Doctor";
     return "Patient";
   };
+
   return (
-    <div className="bg-red fixed w-full top-0 right-0 left-0 p-0 mt-0">
-      <header className="h-16  bg-white border-b border-slate-100 flex items-center justify-between px-8 sticky top-0 z-40"
-      >
-        <h1 className="text-slate-700">Admin Dashboard</h1>
-        <h2 className="text-slate-800" style={{ fontSize: 18, fontWeight: 700 }}> {user.role === "patient" ? "My Health Portal" : user.role === "admin" ? "Admin Dashboard" : "Doctor Dashboard"}</h2>
-        {/* RIGHT SIDE */}
-        <div className="flex items-center space-x-4">
+    <div className="fixed top-0 left-0 right-0 z-30">
+      <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 lg:px-8">
+
+        {/* LEFT SECTION */}
+        <div className="flex items-center gap-3">
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden"
+          >
+            <Menu className="w-6 h-6 text-slate-700" />
+          </button>
+
+          <h2
+            className="text-slate-800 font-bold text-lg"
+          >
+            {user?.role === "patient"
+              ? "My Health Portal"
+              : user?.role === "admin"
+              ? "Admin Dashboard"
+              : "Doctor Dashboard"}
+          </h2>
+        </div>
+
+        {/* RIGHT SECTION */}
+        <div className="flex items-center gap-3">
 
           {/* Search */}
-          <div className="relative">
+          <div className="relative hidden md:block">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
             <input
               type="text"
               placeholder="Search patients, records..."
-              className="pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-teal-400 focus:bg-white transition-all w-64"
+              className="pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-teal-400 focus:bg-white transition-all w-56 lg:w-64"
             />
           </div>
 
@@ -92,7 +116,9 @@ function Navbar() {
                   className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs"
                   style={{ backgroundColor: "#EF4444" }}
                 >
-                  {getTotalNotification() > 9 ? "9+" : getTotalNotification()}
+                  {getTotalNotification() > 9
+                    ? "9+"
+                    : getTotalNotification()}
                 </span>
               )}
             </button>
@@ -103,7 +129,7 @@ function Navbar() {
                 style={{
                   width: "350px",
                   maxHeight: "450px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
                 }}
               >
                 <div className="p-4 border-b">
@@ -121,8 +147,9 @@ function Navbar() {
                     notification.map((item) => (
                       <div
                         key={item.id}
-                        className={`p-4 border-b hover:bg-slate-50 ${item.is_read === 0 ? "bg-blue-50" : ""
-                          }`}
+                        className={`p-4 border-b hover:bg-slate-50 ${
+                          item.is_read === 0 ? "bg-blue-50" : ""
+                        }`}
                       >
                         <h4 className="font-semibold text-sm">
                           {item.title}
@@ -153,7 +180,7 @@ function Navbar() {
             >
               {user?.profile_image ? (
                 <img
-                  src={`https://backend-final-year-api.onrender.com/uploads/${user.profile_image}`}
+                  src={`${import.meta.env.VITE_API_URL}/uploads/${user.profile_image}`}
                   alt="profile"
                   className="w-full h-full object-cover"
                 />
@@ -162,17 +189,18 @@ function Navbar() {
               )}
             </div>
 
-            {/* Name + Role */}
+            {/* Name */}
             <div className="hidden sm:block">
               <p className="text-sm font-semibold text-slate-700 capitalize">
                 {user?.first_name}
               </p>
+
               <p className="text-xs text-slate-400">
                 {getRole()}
               </p>
             </div>
 
-            {/* Dropdown Icon */}
+            {/* Dropdown Arrow */}
             <ChevronDown
               className="w-4 h-4 text-slate-500 cursor-pointer"
               onClick={() => setOpen(!open)}
@@ -205,7 +233,6 @@ function Navbar() {
 
               </div>
             )}
-
           </div>
         </div>
       </header>

@@ -100,163 +100,290 @@ export function AppointmentsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen flex" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#F8FAFC" }}>
-      {/* <Sidebar role="admin" /> */}
-      <div className="ml-55 flex-1 flex flex-col min-h-screen">
-        {/* <Navbar title="Appointments" /> */}
-        <main className="flex-1 p-8 space-y-6 mt-8">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-5 gap-5">
-            {[
-              { label: "Total", value: stats.total, color: "#0E7490", bg: "#E0F7FA" },
-              { label: "Pending", value: stats.pending, color: "#F59E0B", bg: "#FEF3C7" },
-              { label: "Approved", value: stats.approved, color: "#22C55E", bg: "#DCFCE7" },
-              { label: "Completed", value: stats.completed, color: "#64748B", bg: "#F1F5F9" },
-              { label: "Rejected", value: stats.rejected, color: "#EF4444", bg: "#FEE2E2" },
-            ].map((c) => (
-              <div key={c.label} className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: c.bg }}>
-                  <Calendar className="w-5 h-5" style={{ color: c.color }} />
-                </div>
-                <p className="text-slate-800" style={{ fontSize: 26, fontWeight: 800 }}>{c.value}</p>
-                <p className="text-slate-500 text-sm mt-0.5" style={{ fontWeight: 600 }}>{c.label}</p>
-              </div>
-            ))}
-          </div>
+   <div
+  className="min-h-screen flex"
+  style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#F8FAFC" }}
+>
+  {/* <Sidebar role="admin" /> */}
 
-          {/* Table */}
-          <div className="bg-white rounded-2xl" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-            {/* Controls */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 gap-4 flex-wrap">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input value={search} onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search patient, doctor, type..."
-                    className="pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:border-teal-400 focus:bg-white transition-all placeholder:text-slate-400 w-64" />
-                </div>
-                <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
-                  {(["all", "pending", "approved", "rejected", "completed"]).map((s) => (
-                    <button key={s} onClick={() => setFilterStatus(s)}
-                      className="px-3 py-1.5 rounded-lg text-xs capitalize transition-all"
-                      style={{ backgroundColor: filterStatus === s ? "#0E7490" : "transparent", color: filterStatus === s ? "#fff" : "#64748B", fontWeight: filterStatus === s ? 600 : 500 }}>
-                      {s === "all" ? "All" : s}
-                    </button>
-                  ))}
-                </div>
-              </div>
+  <div className="flex-1 flex flex-col min-h-screen w-full">
+    {/* <Navbar title="Appointments" /> */}
 
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 mt-6 sm:mt-8 overflow-x-hidden">
+
+      {/* SUMMARY CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
+        {[
+          { label: "Total", value: stats.total, color: "#0E7490", bg: "#E0F7FA" },
+          { label: "Pending", value: stats.pending, color: "#F59E0B", bg: "#FEF3C7" },
+          { label: "Approved", value: stats.approved, color: "#22C55E", bg: "#DCFCE7" },
+          { label: "Completed", value: stats.completed, color: "#64748B", bg: "#F1F5F9" },
+          { label: "Rejected", value: stats.rejected, color: "#EF4444", bg: "#FEE2E2" },
+        ].map((c) => (
+          <div
+            key={c.label}
+            className="bg-white rounded-2xl p-4 sm:p-5"
+            style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+              style={{ backgroundColor: c.bg }}
+            >
+              <Calendar className="w-5 h-5" style={{ color: c.color }} />
             </div>
 
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  {["Patient", "Doctor / Specialty", "Date & Time", "Type", "Priority", "Status", "Actions"].map((h) => (
-                    <th key={h} className="text-left px-5 py-4 text-xs text-slate-400 uppercase tracking-wider" style={{ fontWeight: 600 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((appt) => {
-                  const sCfg = statusCfg[appt?.status];
-                  const pCfg = priorityCfg[appt?.pri];
-                  return (
-                    <tr key={appt.id}
-                      className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
-                      style={{ backgroundColor: appt.priority === "emergency" ? "rgba(239,68,68,0.02)" : appt.priority === "urgent" ? "rgba(245,158,11,0.02)" : "transparent" }}>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full capitalize flex items-center justify-center text-white text-xs shrink-0"
-                            style={{ background: "linear-gradient(135deg, #0E7490, #14B8A6)", fontWeight: 700 }}>
-                            {appt.patient_first_name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                          </div>
-                          <div>
-                            <p className="text-sm text-slate-800 capitalize" style={{ fontWeight: 600 }}>{`${appt?.patient_first_name} ${appt.patient_last_name}`}</p>
-                            <p className="text-xs text-slate-400">{calculateAge(appt?.date_of_birth)} yrs</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <p className="text-sm text-slate-700" style={{ fontWeight: 500 }}>{appt?.doctor_first_name ? appt?.doctor_first_name : "Not assign"}</p>
-                        <p className="text-xs text-slate-400">{appt.specialty}</p>
-                      </td>
-                      <td className="px-5 py-4">
-                        <p className="text-sm text-slate-700" style={{ fontWeight: 500 }}>{formatDate(appt?.appointment_date)}</p>
-                        <p className="text-xs text-slate-400">{appt?.appointment_time}</p>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-500">{appt?.type}</td>
-                      <td className="px-5 py-4">
-                        {/* <span className="text-xs px-2.5 py-1 rounded-lg" style={{ backgroundColor: pCfg.bg, color: pCfg.color, fontWeight: 600 }}>
-                          {pCfg.label}
-                        </span> */}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg" style={{ backgroundColor: sCfg.bg, color: sCfg.color, fontWeight: 600 }}>
-                          <sCfg.icon className="w-3 h-3" />
-                          {sCfg?.label}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          {appt.status === "pending" && (
-                            <>
-                              <button onClick={() => { setSelectedPatient(appt); setShowApproveModal(true); }}
-                                className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg text-white transition-all hover:opacity-90"
-                                style={{ backgroundColor: "#22C55E", fontWeight: 600 }}>
-                                <CheckCircle className="w-3 h-3" /> Approve
-                              </button>
-                              <button onClick={() => { setSelectedAppt(appt); setShowRejectInput(true); }}
-                                className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg text-white transition-all hover:opacity-90"
-                                style={{ backgroundColor: "#EF4444", fontWeight: 600 }}>
-                                <XCircle className="w-3 h-3" /> Reject
-                              </button>
-                            </>
-                          )}
-                          <button onClick={() => { setSelectedItem(appt); setShowDetail(true); }}
-                            className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center hover:border-teal-300 hover:bg-teal-50 transition-colors">
-                            <Eye className="w-3.5 h-3.5 text-slate-400" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            <div className="px-6 py-4 border-t border-slate-100">
-              <p className="text-xs text-slate-400">Showing {filtered.length} of {appointments.length} appointments</p>
-            </div>
+            <p
+              className="text-slate-800 text-xl sm:text-2xl lg:text-[26px]"
+              style={{ fontWeight: 800 }}
+            >
+              {c.value}
+            </p>
+
+            <p className="text-slate-500 text-sm mt-0.5" style={{ fontWeight: 600 }}>
+              {c.label}
+            </p>
           </div>
-        </main>
+        ))}
       </div>
 
-      {/* Appointment Detail Modal */}
-      {showDetail && selectedItem && (
-        <ModalDetail
-          setShowDetail={setShowDetail}
-          selectedItem={selectedItem}
-          setSelectedItem={setSelectedItem}
-        />
-      )}
-      {/* rejection form */}
-      {
-        showRejectInput && (
-          <RejectForm
-            selectedAppt={selectedAppt}
-            setShowRejectInput={setShowRejectInput}
-            onSuccess={fetchAppointment}
-          />
-        )
-      }
-      {/* Add Appointment Modal form */}
-      {showApproveModal && (
-        <ApproveForm
-          setShowAddModal={setShowApproveModal}
-          SelectedApp={selectedPatient}
-          onSuccess={fetchAppointment}
-        />
-      )}
-    </div>
+      {/* TABLE CONTAINER */}
+      <div
+        className="bg-white rounded-2xl w-full overflow-hidden"
+        style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}
+      >
+
+        {/* CONTROLS */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100 gap-3 sm:gap-4">
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+
+            <div className="relative w-full sm:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search patient, doctor, type..."
+                className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:border-teal-400 focus:bg-white transition-all placeholder:text-slate-400"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+              {["all", "pending", "approved", "rejected", "completed"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setFilterStatus(s)}
+                  className="px-3 py-1.5 rounded-lg text-xs capitalize transition-all"
+                  style={{
+                    backgroundColor: filterStatus === s ? "#0E7490" : "transparent",
+                    color: filterStatus === s ? "#fff" : "#64748B",
+                    fontWeight: filterStatus === s ? 600 : 500,
+                  }}
+                >
+                  {s === "all" ? "All" : s}
+                </button>
+              ))}
+            </div>
+
+          </div>
+        </div>
+
+        {/* TABLE WRAPPER (IMPORTANT FOR RESPONSIVENESS) */}
+        <div className="w-full overflow-x-auto">
+
+          <table className="min-w-[900px] w-full">
+            <thead>
+              <tr className="border-b border-slate-100">
+                {[
+                  "Patient",
+                  "Doctor / Specialty",
+                  "Date & Time",
+                  "Type",
+                  "Status",
+                  "Actions",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="text-left px-4 sm:px-5 py-4 text-xs text-slate-400 uppercase tracking-wider whitespace-nowrap"
+                    style={{ fontWeight: 600 }}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.map((appt) => {
+                const sCfg = statusCfg[appt?.status];
+                const pCfg = priorityCfg[appt?.pri];
+
+                return (
+                  <tr
+                    key={appt.id}
+                    className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
+                    style={{
+                      backgroundColor:
+                        appt.priority === "emergency"
+                          ? "rgba(239,68,68,0.02)"
+                          : appt.priority === "urgent"
+                          ? "rgba(245,158,11,0.02)"
+                          : "transparent",
+                    }}
+                  >
+
+                    {/* PATIENT */}
+                    <td className="px-4 sm:px-5 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs shrink-0"
+                          style={{
+                            background: "linear-gradient(135deg, #0E7490, #14B8A6)",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {appt.patient_first_name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)}
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="text-sm text-slate-800 capitalize truncate" style={{ fontWeight: 600 }}>
+                            {`${appt?.patient_first_name} ${appt.patient_last_name}`}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {calculateAge(appt?.date_of_birth)} yrs
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* DOCTOR */}
+                    <td className="px-4 sm:px-5 py-4 whitespace-nowrap">
+                      <p className="text-sm text-slate-700" style={{ fontWeight: 500 }}>
+                        {appt?.doctor_first_name || "Not assign"}
+                      </p>
+                      <p className="text-xs text-slate-400">{appt.specialty}</p>
+                    </td>
+
+                    {/* DATE */}
+                    <td className="px-4 sm:px-5 py-4 whitespace-nowrap">
+                      <p className="text-sm text-slate-700" style={{ fontWeight: 500 }}>
+                        {formatDate(appt?.appointment_date)}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {appt?.appointment_time}
+                      </p>
+                    </td>
+
+                    {/* TYPE */}
+                    <td className="px-4 sm:px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
+                      {appt?.type}
+                    </td>
+
+                    {/* PRIORITY */}
+                    {/* <td className="px-4 sm:px-5 py-4 whitespace-nowrap" /> */}
+
+                    {/* STATUS */}
+                    <td className="px-4 sm:px-5 py-4 whitespace-nowrap">
+                      <span
+                        className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg"
+                        style={{
+                          backgroundColor: sCfg.bg,
+                          color: sCfg.color,
+                          fontWeight: 600,
+                        }}
+                      >
+                        <sCfg.icon className="w-3 h-3" />
+                        {sCfg?.label}
+                      </span>
+                    </td>
+
+                    {/* ACTIONS (UNCHANGED BUTTONS) */}
+                    <td className="px-4 sm:px-5 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+
+                        {appt.status === "pending" && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setSelectedPatient(appt);
+                                setShowApproveModal(true);
+                              }}
+                              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg text-white transition-all hover:opacity-90"
+                              style={{ backgroundColor: "#22C55E", fontWeight: 600 }}
+                            >
+                              <CheckCircle className="w-3 h-3" /> Approve
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setSelectedAppt(appt);
+                                setShowRejectInput(true);
+                              }}
+                              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg text-white transition-all hover:opacity-90"
+                              style={{ backgroundColor: "#EF4444", fontWeight: 600 }}
+                            >
+                              <XCircle className="w-3 h-3" /> Reject
+                            </button>
+                          </>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            setSelectedItem(appt);
+                            setShowDetail(true);
+                          }}
+                          className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center hover:border-teal-300 hover:bg-teal-50 transition-colors"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-slate-400" />
+                        </button>
+
+                      </div>
+                    </td>
+
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="px-4 sm:px-6 py-4 border-t border-slate-100">
+          <p className="text-xs text-slate-400">
+            Showing {filtered.length} of {appointments.length} appointments
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  {/* MODALS (UNCHANGED) */}
+  {showDetail && selectedItem && (
+    <ModalDetail
+      setShowDetail={setShowDetail}
+      selectedItem={selectedItem}
+      setSelectedItem={setSelectedItem}
+    />
+  )}
+
+  {showRejectInput && (
+    <RejectForm
+      selectedAppt={selectedAppt}
+      setShowRejectInput={setShowRejectInput}
+      onSuccess={fetchAppointment}
+    />
+  )}
+
+  {showApproveModal && (
+    <ApproveForm
+      setShowAddModal={setShowApproveModal}
+      SelectedApp={selectedPatient}
+      onSuccess={fetchAppointment}
+    />
+  )}
+</div>
   );
 }
 export default AppointmentsPage
