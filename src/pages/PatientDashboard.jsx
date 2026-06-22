@@ -21,7 +21,7 @@ export default function PatientDashboard() {
   const { user } = useAuth();
 
   return (
-    <main className="flex-1 lg:ml-64 pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
+    <main className="flex-1  pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
 
       {/* Page Container */}
       <div className="max-w-7xl mx-auto">

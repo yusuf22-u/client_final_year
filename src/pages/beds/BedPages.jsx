@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
 import toast from "react-hot-toast";
-import { BedDouble, User, CheckCircle } from "lucide-react";
+import { BedDouble, User, CheckCircle, Plus, Trash2 } from "lucide-react";
 import AssignBed from "./AssignBed";
+import AddBedModal from "./AddBed";
 
 function BedPages() {
   const [beds, setBeds] = useState([]);
   const [patients, setPatients] = useState([]);
   const [selectedBed, setSelectedBed] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  console.log("beds",beds)
+  const [open, setOpen] = useState(false);
+
+
+
+  // console.log("beds", beds)
 
   const fetchBeds = async () => {
     const res = await API.get("/beds");
@@ -61,7 +66,17 @@ function BedPages() {
       toast.error(error.response?.data?.message || "Failed");
     }
   };
+  // DELETE BED
+  const handleDelete = async (id) => {
+    try {
+      await API.delete(`/beds/${id}`)
+      toast.success("bed deleted successefully")
+      location.reload()
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed")
+    }
 
+  }
   return (
     <div className="p-3 sm:p-6 bg-gray-50 min-h-screen font-inter">
       <main className="flex flex-col mt-10 sm:mt-12">
@@ -134,6 +149,14 @@ function BedPages() {
               <span className="w-3 h-3 rounded-full bg-blue-500"></span>Maintenance
             </li>
           </ul>
+          <button
+            onClick={() => setOpen(true)}
+            className="flex items-center justify-center cursor-pointer gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-white text-sm bg-teal-600 hover:opacity-90 transition shadow-md w-full sm:w-auto"
+          >
+            <Plus className="w-4 h-4" /> Add Bed
+          </button>
+
+
         </div>
 
         {/* Beds Grid */}
@@ -175,6 +198,9 @@ function BedPages() {
                   <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
                     <BedDouble className="text-sm" />
                     {bed.bed_number}
+                    <button onClick={() => handleDelete(bed.id)} className="bg-white  flex justify-center cursor-pointer rounded-full w-6 h-6 items-center">
+                      <Trash2 color="red" size={15} />
+                    </button>
                   </h3>
 
                   {isOccupied ? (
@@ -228,6 +254,7 @@ function BedPages() {
                         Cleaning Completed
                       </button>
                     )}
+
                   </div>
                 </div>
               );
@@ -243,7 +270,15 @@ function BedPages() {
               onAssign={assignBed}
             />
           )}
-
+          {
+            open && (
+              <AddBedModal
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                onSuccess={fetchBeds}
+              />
+            )
+          }
         </div>
       </main>
     </div>

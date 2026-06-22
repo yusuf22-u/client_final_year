@@ -26,10 +26,14 @@ import {
   Globe,
   ArrowBigLeft
 } from "lucide-react";
-import { formatDate } from "../../helpers/formatDate"
+import { formatDate } from "../helpers/formatDate"
 import { useNavigate } from "react-router-dom"
-import API from "../../api/axios";
-export function Profile() {
+import API from "../api/axios";
+import { useAuth } from "../context/AuthContext"
+import toast from "react-hot-toast";
+
+
+export function UserAccountPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -61,12 +65,24 @@ export function Profile() {
     fetchProfile();
   }, []);
   // Edit form state
-  const [editForm, setEditForm] = useState({ ...profile });
+  // const [editForm, setEditForm] = useState({ ...profile });
 
   // Password form
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
+
+  const [editForm, setEditForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    role: "",
+  });
+  const { user } = useAuth()
 
   // Notification settings
   const [notifications, setNotifications] = useState({
@@ -102,32 +118,88 @@ export function Profile() {
     patient: { label: "Patient", color: "#8B5CF6", bg: "#EDE9FE" },
   };
 
-  const handleSaveProfile = () => {
-    setProfile({ ...editForm });
-    setIsEditing(false);
-    console.log("Profile updated:", editForm);
-  };
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
 
+    setEditForm({
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+    });
+
+    setShowEditModal(true);
+  };
+  const handleImageChange = (e) => {
+    setProfileImage(e.target.files[0]);
+  };
+  const handleUpdateUser = async () => {
+    try {
+      const formData = new FormData();
+
+      formData.append("first_name", editForm.first_name);
+      formData.append("last_name", editForm.last_name);
+      formData.append("email", editForm.email);
+      formData.append("phone", editForm.phone);
+      formData.append("role", editForm.role);
+
+      if (profileImage) {
+        formData.append("profile_image", profileImage);
+      }
+
+      await API.put(
+        `/users/${selectedUser.id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success("User updated successfully");
+
+      setShowEditModal(false);
+
+      fetchUsers();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update user"
+      );
+    }
+  };
   const handleCancelEdit = () => {
     setEditForm({ ...profile });
     setIsEditing(false);
   };
 
-  const handleChangePassword = () => {
-    if (newPassword !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
+  const handleChangePassword = async () => {
+    try {
+      const userId = user?.id
+
+      const { data } = await API.put("/users/change-password", {
+        userId,
+        currentPassword,
+        newPassword,
+      });
+
+      toast.success(data.message);
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update password"
+      );
     }
-    console.log("Changing password");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
   };
 
   return (
     <div className="min-h-screen flex" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#F8FAFC" }}>
 
-      <div className=" flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen">
 
         <main className="flex-1 p-8 mt-6">
           {/* Profile Header */}
@@ -154,7 +226,7 @@ export function Profile() {
                   </button>
                 </div>
                 <div>
-                  <h2 className="capitalize" style={{ fontSize: 24, fontWeight: 800, color: "#0F172A" }}>{` ${profile.first_name} ${profile.last_name}`}</h2>
+                  <h2 className="capitalize" style={{ fontSize: 24, fontWeight: 800, color: "#0F172A" }}>{`Dr. ${profile.first_name} ${profile.last_name}`}</h2>
                   <div className="flex items-center gap-3 mt-2">
                     <div className="px-3 py-1.5 rounded-lg text-xs capitalize bg-primary text-white" >
                       {/* {roleConfig[profile.role].label} */}
@@ -179,7 +251,7 @@ export function Profile() {
 
               <div className="flex items-center gap-2">
                 <button className="px-4 py-2 rounded-xl border-2 border-slate-200 flex items-center gap-2 text-slate-700 transition-all hover:bg-slate-50" style={{ fontWeight: 600, fontSize: 13 }}>
-                  <ArrowBigLeft onClick={()=>navigate(-1)} className="w-4 h-4" />
+                  <ArrowBigLeft onClick={() => navigate(-1)} className="w-4 h-4" />
                   back
                 </button>
               </div>
@@ -216,35 +288,13 @@ export function Profile() {
             <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
               <div className="flex items-center justify-between mb-6">
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A" }}>Personal Information</h3>
-                {!isEditing ? (
-                  <button
-                    // onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
-                    style={{ backgroundColor: "#0E7490", color: "#fff", fontWeight: 600, fontSize: 13 }}
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    {/* Edit Profile */}
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleCancelEdit}
-                      className="px-4 py-2 rounded-xl border-2 border-slate-200 text-slate-700 transition-all hover:bg-slate-50"
-                      style={{ fontWeight: 600, fontSize: 13 }}
-                    >
-                      <X className="w-4 h-4 inline mr-1" />
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveProfile}
-                      className="px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
-                      style={{ backgroundColor: "#22C55E", color: "#fff", fontWeight: 600, fontSize: 13 }}
-                    >
-                      <Save className="w-4 h-4" />
-                      Save Changes
-                    </button>
-                  </div>
-                )}
+
+                <button
+                  onClick={() => handleEditUser(user)}
+                  className="p-2 border rounded-lg"
+                >
+                  Edit
+                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
@@ -252,12 +302,12 @@ export function Profile() {
                   <label className="block text-sm text-slate-700 mb-2" style={{ fontWeight: 600 }}>Full Name</label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      value={isEditing ? editForm.first_name : `${profile.first_name} ${profile.last_name}`}
-                      onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                      disabled={!isEditing}
+                    <p
                       className="w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:border-teal-400 focus:bg-white transition-all disabled:opacity-60"
-                    />
+                    >
+                      {`${profile.first_name} ${profile.last_name}`}
+                    </p>
+
                   </div>
                 </div>
 
@@ -265,12 +315,11 @@ export function Profile() {
                   <label className="block text-sm text-slate-700 mb-2" style={{ fontWeight: 600 }}>Email Address</label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      value={isEditing ? editForm.email : profile.email}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      disabled={!isEditing}
+                    <p
                       className="w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:border-teal-400 focus:bg-white transition-all disabled:opacity-60"
-                    />
+                    >
+                      {profile.email}
+                    </p>
                   </div>
                 </div>
 
@@ -278,12 +327,11 @@ export function Profile() {
                   <label className="block text-sm text-slate-700 mb-2" style={{ fontWeight: 600 }}>Phone Number</label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      value={isEditing ? editForm.phone : profile.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      disabled={!isEditing}
+                    <p
                       className="w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:border-teal-400 focus:bg-white transition-all disabled:opacity-60"
-                    />
+                    >
+                      {profile.phone}
+                    </p>
                   </div>
                 </div>
 
@@ -291,13 +339,11 @@ export function Profile() {
                   <label className="block text-sm text-slate-700 mb-2" style={{ fontWeight: 600 }}>Date of Birth</label>
                   <div className="relative">
                     <Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="date"
-                      value={isEditing ? editForm.dob : profile.date_of_birth}
-                      onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
-                      disabled={!isEditing}
+                    <p
                       className="w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:border-teal-400 focus:bg-white transition-all disabled:opacity-60"
-                    />
+                    >
+                      {profile.date_of_birth ? new Date(date_of_birth).toLocaleDateString() : "12/02/1990"}
+                    </p>
                   </div>
                 </div>
 
@@ -305,13 +351,13 @@ export function Profile() {
                   <label className="block text-sm text-slate-700 mb-2" style={{ fontWeight: 600 }}>Address</label>
                   <div className="relative">
                     <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                    <textarea
-                      value={isEditing ? editForm.address : profile.staff_address}
-                      onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                      disabled={!isEditing}
+                    <p
                       className="w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-700 focus:outline-none focus:border-teal-400 focus:bg-white transition-all resize-none disabled:opacity-60"
                       rows={2}
-                    />
+                    >
+                      {profile.staff_address}
+                    </p>
+
                   </div>
                 </div>
               </div>
@@ -602,6 +648,120 @@ export function Profile() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+          {showEditModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-2xl w-full max-w-lg p-6">
+
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-bold">
+                    Update User
+                  </h2>
+
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+
+                  <input
+                    type="text"
+                    value={editForm.first_name}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        first_name: e.target.value,
+                      })
+                    }
+                    placeholder="First Name"
+                    className="w-full p-3 border rounded-xl"
+                  />
+
+                  <input
+                    type="text"
+                    value={editForm.last_name}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        last_name: e.target.value,
+                      })
+                    }
+                    placeholder="Last Name"
+                    className="w-full p-3 border rounded-xl"
+                  />
+
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        email: e.target.value,
+                      })
+                    }
+                    placeholder="Email"
+                    className="w-full p-3 border rounded-xl"
+                  />
+
+                  <input
+                    type="text"
+                    value={editForm.phone}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        phone: e.target.value,
+                      })
+                    }
+                    placeholder="Phone"
+                    className="w-full p-3 border rounded-xl"
+                  />
+
+                  <select
+                    value={editForm.role}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        role: e.target.value,
+                      })
+                    }
+                    className="w-full p-3 border rounded-xl"
+                  >
+                    <option value="patient">Patient</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="nurse">Nurse</option>
+                    <option value="pharmacist">Pharmacist</option>
+                    <option value="lab_technician">Lab Technician</option>
+                  </select>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full p-3 border rounded-xl"
+                  />
+
+                  {selectedUser?.profile_image && (
+                    <img
+                      src={`http://localhost:4000/uploads/${selectedUser.profile_image}`}
+                      alt="profile"
+                      className="w-20 h-20 rounded-full object-cover border"
+                    />
+                  )}
+
+                </div>
+
+                <button
+                  onClick={handleUpdateUser}
+                  className="w-full mt-5 bg-[#0E7490] text-white py-3 rounded-xl font-semibold"
+                >
+                  Update User
+                </button>
+
               </div>
             </div>
           )}

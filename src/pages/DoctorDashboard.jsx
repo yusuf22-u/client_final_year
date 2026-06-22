@@ -58,7 +58,7 @@ const statusClass = (status) => {
 // Replace your return (...) with this improved responsive layout
 
 return (
-  <main className="flex-1 lg:ml-64 pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
+  <main className="flex-1 pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
 
     {/* CENTER WRAPPER */}
     <div className="max-w-7xl mx-auto space-y-6">

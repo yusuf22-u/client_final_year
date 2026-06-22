@@ -162,200 +162,240 @@ const medicalHistory = [
   return (
     <div className="min-h-screen flex" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#F8FAFC" }}>
 
-      <div className="ml-55 flex-1 flex flex-col min-h-screen">
+      <div className=" flex-1 flex flex-col min-h-screen">
 
-        <main className="flex-1 p-8 mt-6">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 mt-16 sm:mt-20">
           {/* Patient Header */}
-          <div className="bg-white rounded-2xl p-6 mb-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "#E0F7FA" }}>
-                  <User className="w-10 h-10" style={{ color: "#0E7490" }} />
+          <div className="bg-white rounded-2xl p-4 sm:p-6 mb-6 shadow-sm">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          
+                    {/* LEFT */}
+                    <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+          
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center bg-[#E0F7FA] shrink-0">
+                        <User className="w-8 h-8 sm:w-10 sm:h-10 text-[#0E7490]" />
+                      </div>
+          
+                      <div>
+                        <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-slate-900 capitalize">
+                          {`${patients?.first_name} ${patients?.last_name}`}
+                        </h2>
+          
+                        <div className="flex flex-wrap gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-slate-600">
+                          <span>{calculateAge(patients?.date_of_birth)} yrs • {patients?.gender}</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span>Blood: {patientInfo.bloodType}</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span>DOB: {formatDate(patients?.date_of_birth)}</span>
+                        </div>
+          
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3 text-xs sm:text-sm text-slate-600">
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-4 h-4" />
+                            <span>+(220) {patients?.phone}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-4 h-4" />
+                            <span className="break-all">{patients?.email}</span>
+                          </div>
+                        </div>
+          
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <div className="px-3 py-1.5 rounded-lg text-xs bg-red-100 text-red-600 font-semibold">
+                            <AlertTriangle className="w-3 h-3 inline mr-1" />
+                            Allergies: {patientInfo.allergies.join(", ")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+          
+                  </div>
                 </div>
-                <div>
-                  <h2 className="capitalize" style={{ fontSize: 24, fontWeight: 800, color: "#0F172A" }}>{`${patients?.first_name} ${patients?.last_name}`}</h2>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
-                    <span>{calculateAge(patients?.date_of_birth)} years • {patients?.gender}</span>
-                    <span>•</span>
-                    <span>Blood Type: {patientInfo?.bloodType}</span>
-                    <span>•</span>
-                    <span>DOB: {formatDate(patients?.date_of_birth)}</span>
-                  </div>
-                  <div className="flex items-center gap-4 mt-3 text-sm">
-                    <div className="flex items-center gap-1.5 text-slate-600">
-                      <Phone className="w-4 h-4" />
-                      <span>+(220) {patients?.phone}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-600">
-                      <Mail className="w-4 h-4" />
-                      <span>{patients?.email}</span>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="px-3 py-1.5 rounded-lg text-xs" style={{ backgroundColor: "#FEE2E2", color: "#DC2626", fontWeight: 600 }}>
-                      <AlertTriangle className="w-3 h-3 inline mr-1" />
-                      Allergies: {patientInfo.allergies.join(", ")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-              
-              </div>
-            </div>
-          </div>
-
+          
           {/* Tabs */}
-          <div className="bg-white rounded-2xl mb-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-            <div className="flex items-center gap-2 p-2 border-b border-slate-100">
+           <div className="bg-white rounded-2xl mb-6 shadow-sm">
+
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 p-2 border-b border-slate-100">
+
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
+
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all w-full sm:w-auto justify-start sm:justify-center"
                     style={{
                       backgroundColor: isActive ? "#0E7490" : "transparent",
                       color: isActive ? "#fff" : "#64748B",
                       fontWeight: isActive ? 700 : 600,
-                      fontSize: 14,
+                      fontSize: 13,
                     }}
                   >
                     <tab.icon className="w-4 h-4" />
-                    {tab.label}
+                    <span className="text-sm">{tab.label}</span>
                   </button>
                 );
               })}
+
             </div>
+
           </div>
 
           {/* Overview Tab */}
-          {activeTab === "overview" && (
-            <div className="grid grid-cols-3 gap-6">
-              {/* Current Vitals */}
-              <div className="col-span-2 bg-white rounded-2xl p-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", marginBottom: 16 }}>Latest Vitals</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { label: "Blood Pressure", value: vitals[0]?.blood_pressure, unit: "mmHg", icon: Heart, color: "#EF4444" },
-                    { label: "Heart Rate", value:vitals[0]?.heart_rate, unit: "bpm", icon: Activity, color: "#F59E0B" },
-                    { label: "Temperature", value: vitals[0]?.temperature, unit: "°C", icon: Thermometer, color: "#22C55E" },
-                    { label: "Weight", value: vitals[0]?.weight, unit: "kg", icon: Weight, color: "#0E7490" },
-                    { label: "Respiratory", value: vitals[0]?.respiratory_rate, unit: "bpm", icon: Activity, color: "#8B5CF6" },
-                    { label: "O2 Saturation", value: vitals[0]?.oxygen_saturation, unit: "%", icon: Droplets, color: "#06B6D4" },
-                  ].map((vital) => (
-                    <div key={vital.label} className="p-4 rounded-xl" style={{ backgroundColor: "#F8FAFC" }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <vital.icon className="w-4 h-4" style={{ color: vital.color }} />
-                        <p className="text-xs text-slate-500" style={{ fontWeight: 600 }}>{vital.label}</p>
-                      </div>
-                      <p style={{ fontSize: 22, fontWeight: 800, color: "#0F172A" }}>
-                        {vital.value} <span className="text-sm text-slate-500 font-normal">{vital.unit}</span>
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-slate-500 mt-3">Last updated: {formatDate(vitals[0]?.created_at)}</p>
-              </div>
-
-              {/* Quick Info */}
-              <div className="space-y-6">
-                <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", marginBottom: 12 }}>Primary Doctor</h3>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "#E0F7FA" }}>
-                      <Stethoscope className="w-6 h-6" style={{ color: "#0E7490" }} />
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 15, fontWeight: 700, color: "#0F172A" }}>{patientInfo.primaryDoctor}</p>
-                      <p className="text-sm text-slate-500">Internal Medicine</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", marginBottom: 12 }}>Chronic Conditions</h3>
-                  <div className="space-y-2">
-                    {patientInfo.chronicConditions.map((cond) => (
-                      <div key={cond} className="px-3 py-2 rounded-lg" style={{ backgroundColor: "#FEF3C7" }}>
-                        <p className="text-sm" style={{ fontWeight: 600, color: "#F59E0B" }}>{cond}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+                   {activeTab === "overview" && (
+                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+         
+                       {/* ================= LEFT: VITALS ================= */}
+                       <div className="lg:col-span-2 bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+         
+                         <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-4">
+                           Latest Vitals
+                         </h3>
+         
+                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+         
+                           {[
+                             { label: "Blood Pressure", value: latestVitals?.blood_pressure, unit: "mmHg", icon: Heart, color: "#EF4444" },
+                             { label: "Heart Rate", value: latestVitals?.heart_rate, unit: "bpm", icon: Activity, color: "#F59E0B" },
+                             { label: "Temperature", value: latestVitals?.temperature, unit: "°C", icon: Thermometer, color: "#22C55E" },
+                             { label: "Weight", value: latestVitals?.weight, unit: "kg", icon: Weight, color: "#0E7490" },
+                             { label: "Respiratory", value: latestVitals?.respiratory_rate, unit: "bpm", icon: Activity, color: "#8B5CF6" },
+                             { label: "O2 Saturation", value: latestVitals?.oxygen_saturation, unit: "%", icon: Droplets, color: "#06B6D4" },
+                           ].map((vital) => (
+                             <div
+                               key={vital.label}
+                               className="p-3 sm:p-4 rounded-xl bg-slate-50"
+                             >
+                               <div className="flex items-center gap-2 mb-2">
+                                 <vital.icon
+                                   className="w-4 h-4 flex-shrink-0"
+                                   style={{ color: vital.color }}
+                                 />
+                                 <p className="text-[11px] sm:text-xs text-slate-500 font-semibold leading-tight">
+                                   {vital.label}
+                                 </p>
+                               </div>
+         
+                               <p className="text-lg sm:text-2xl font-extrabold text-slate-900">
+                                 {vital.value}{" "}
+                                 <span className="text-xs sm:text-sm text-slate-500 font-normal">
+                                   {vital.unit}
+                                 </span>
+                               </p>
+                             </div>
+                           ))}
+         
+                         </div>
+         
+                         <p className="text-[11px] sm:text-xs text-slate-500 mt-3">
+                           Last updated: {latestVitals?.date}
+                         </p>
+                       </div>
+         
+                       {/* ================= RIGHT: INFO CARDS ================= */}
+                       <div className="space-y-4 sm:space-y-6">
+         
+                         {/* Primary Doctor */}
+                         <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+         
+                           <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-3">
+                             Primary Doctor
+                           </h3>
+         
+                           <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center bg-[#E0F7FA] flex-shrink-0">
+                               <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6 text-[#0E7490]" />
+                             </div>
+         
+                             <div className="min-w-0">
+                               <p className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                                 {patientInfo.primaryDoctor}
+                               </p>
+                               <p className="text-xs sm:text-sm text-slate-500">
+                                 Internal Medicine
+                               </p>
+                             </div>
+                           </div>
+                         </div>
+         
+                         {/* Chronic Conditions */}
+                         <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+         
+                           <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-3">
+                             Chronic Conditions
+                           </h3>
+         
+                           <div className="flex flex-wrap gap-2">
+                             {patientInfo.chronicConditions.map((cond) => (
+                               <span
+                                 key={cond}
+                                 className="px-2 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold bg-yellow-100 text-yellow-700"
+                               >
+                                 {cond}
+                               </span>
+                             ))}
+                           </div>
+                         </div>
+         
+                       </div>
+         
+                     </div>
+                   )}
 
           {/* Vitals Tab */}
+         {/* Vitals Tab */}
           {activeTab === "vitals" && (
-            <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-              <div className="flex items-center justify-between mb-6">
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A" }}>Vital Signs History</h3>
-                {/* <button
-                  onClick={() => setShowAddVital(true)
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
 
-                  }
-                  className="px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
-                  style={{ backgroundColor: "#0E7490", color: "#fff", fontWeight: 600, fontSize: 13 }}
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Vital Signs History
+                </h3>
+
+                {/* <button
+                  onClick={() => setShowAddVital(true)}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl flex items-center justify-center gap-2 bg-[#0E7490] text-white font-semibold text-sm"
                 >
                   <Plus className="w-4 h-4" />
                   Add Reading
                 </button> */}
               </div>
-              <div className="overflow-x-auto">
+
+              {/* ================= DESKTOP TABLE ================= */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      <th className="text-left py-3 px-4 text-xs text-slate-500" style={{ fontWeight: 600 }}>Date</th>
-                      <th className="text-left py-3 px-4 text-xs text-slate-500" style={{ fontWeight: 600 }}>BP (mmHg)</th>
-                      <th className="text-left py-3 px-4 text-xs text-slate-500" style={{ fontWeight: 600 }}>HR (bpm)</th>
-                      <th className="text-left py-3 px-4 text-xs text-slate-500" style={{ fontWeight: 600 }}>Temp (°C)</th>
-                      <th className="text-left py-3 px-4 text-xs text-slate-500" style={{ fontWeight: 600 }}>Weight (kg)</th>
-                      <th className="text-left py-3 px-4 text-xs text-slate-500" style={{ fontWeight: 600 }}>Resp (bpm)</th>
-                      <th className="text-left py-3 px-4 text-xs text-slate-500" style={{ fontWeight: 600 }}>O2 (%)</th>
+                      <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">Date</th>
+                      <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">BP</th>
+                      <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">HR</th>
+                      <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">Temp</th>
+                      <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">Weight</th>
+                      <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">Resp</th>
+                      <th className="text-left py-3 px-4 text-xs text-slate-500 font-semibold">O2</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {vitals?.length > 0 ? (
                       vitals.map((vital, idx) => (
-                        <tr
-                          key={idx}
-                          className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
-                        >
-                          <td
-                            className="py-4 px-4 text-sm text-slate-700"
-                            style={{ fontWeight: 600 }}
-                          >
+                        <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50">
+                          <td className="py-4 px-4 text-sm font-semibold text-slate-700">
                             {formatDate(vital?.recorded_at)}
                           </td>
-                          <td className="py-4 px-4 text-sm text-slate-800">
-                            {vital?.blood_pressure}
-                          </td>
-                          <td className="py-4 px-4 text-sm text-slate-800">
-                            {vital?.heart_rate}
-                          </td>
-                          <td className="py-4 px-4 text-sm text-slate-800">
-                            {vital?.temperature}
-                          </td>
-                          <td className="py-4 px-4 text-sm text-slate-800">
-                            {vital?.weight}
-                          </td>
-                          <td className="py-4 px-4 text-sm text-slate-800">
-                            {vital?.respiratory_rate}
-                          </td>
-                          <td className="py-4 px-4 text-sm text-slate-800">
-                            {vital?.oxygen_saturation}
-                          </td>
+                          <td className="py-4 px-4 text-sm">{vital?.blood_pressure}</td>
+                          <td className="py-4 px-4 text-sm">{vital?.heart_rate}</td>
+                          <td className="py-4 px-4 text-sm">{vital?.temperature}</td>
+                          <td className="py-4 px-4 text-sm">{vital?.weight}</td>
+                          <td className="py-4 px-4 text-sm">{vital?.respiratory_rate}</td>
+                          <td className="py-4 px-4 text-sm">{vital?.oxygen_saturation}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td
-                          colSpan="7"
-                          className="py-10 text-center text-slate-400 text-sm"
-                        >
+                        <td colSpan="7" className="py-10 text-center text-slate-400">
                           No vital records yet
                         </td>
                       </tr>
@@ -363,8 +403,60 @@ const medicalHistory = [
                   </tbody>
                 </table>
               </div>
-            </div>
 
+              {/* ================= MOBILE CARDS ================= */}
+              <div className="grid grid-cols-1 gap-4 md:hidden">
+                {vitals?.length > 0 ? (
+                  vitals.map((vital, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-xl border border-slate-100 bg-slate-50"
+                    >
+                      <p className="text-sm font-bold text-slate-900 mb-3">
+                        {formatDate(vital?.recorded_at)}
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <p className="text-slate-500 text-xs">BP</p>
+                          <p className="font-semibold">{vital?.blood_pressure}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-slate-500 text-xs">HR</p>
+                          <p className="font-semibold">{vital?.heart_rate}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-slate-500 text-xs">Temp</p>
+                          <p className="font-semibold">{vital?.temperature}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-slate-500 text-xs">Weight</p>
+                          <p className="font-semibold">{vital?.weight}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-slate-500 text-xs">Resp</p>
+                          <p className="font-semibold">{vital?.respiratory_rate}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-slate-500 text-xs">O2</p>
+                          <p className="font-semibold">{vital?.oxygen_saturation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-slate-400 text-sm py-10">
+                    No vital records yet
+                  </p>
+                )}
+              </div>
+
+            </div>
           )}
         
           {/* Prescriptions Tab */}

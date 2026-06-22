@@ -29,6 +29,7 @@ export default function PatientBooking() {
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const { user } = useAuth()
+   console.log("apoint", appointments)
   const [form, setForm] = useState({
 
     date: "",
@@ -78,6 +79,7 @@ export default function PatientBooking() {
         },
 
       });
+       console.log("apoint", res.data)
       setAppointments(res.data);
       console.log("apoint", res.data)
     } catch (err) {
@@ -90,7 +92,7 @@ export default function PatientBooking() {
   }, []);
 
   return (
-    <main className="flex-1 lg:ml-64 pt-20 px-4 sm:px-6 lg:px-8 pb-10 bg-slate-100 min-h-screen">
+    <main className="flex-1  pt-20 px-4 sm:px-6 lg:px-8 pb-10 bg-slate-100 min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* HEADER */}

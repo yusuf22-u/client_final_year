@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-    Users,
-    CalendarDays,
-    ClipboardList,
-    Star,
-    Stethoscope,
-    Eye,
-    Edit3
+  Users,
+  HeartPulse,
+  AlertTriangle,
+  Activity,
+  Eye,
+  Edit3,
+  ClipboardList
 } from "lucide-react";
 import API from "../../api/axios";
 import AppointModal from "../staff/AppointModal";
@@ -35,29 +35,90 @@ const AssignPatient = () => {
 
         fetchAssignPatients();
     }, []);
-    const statusClass = (status) => {
-        if (status === "stable")
+    const total = patients.length;
+  const stable = patients.filter(
+    (p) => p.assignment_status?.toLowerCase() === "stable"
+  ).length;
+
+  const monitoring = patients.filter(
+    (p) => p.assignment_status?.toLowerCase() === "monitoring"
+  ).length;
+
+  const critical = patients.filter(
+    (p) => p.assignment_status?.toLowerCase() === "critical"
+  ).length;
+
+//   const statusClass = (status) => {
+//     switch (status?.toLowerCase()) {
+//       case "stable":
+//         return "bg-green-100 text-green-700";
+//       case "monitoring":
+//         return "bg-yellow-100 text-yellow-700";
+//       case "critical":
+//         return "bg-red-100 text-red-700";
+//       default:
+//         return "bg-cyan-100 text-cyan-700";
+//     }
+//   };
+
+    const statusClass = (type) => {
+        if (type=== "routine")
             return "px-3 py-1 rounded-full text-xs bg-green-100 text-green-600";
 
-        if (status === "monitoring")
+        if (type === "consulation")
             return "px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700";
 
         if (status === "critical")
             return "px-3 py-1 rounded-full text-xs bg-red-100 text-red-600";
 
-        return "px-3 py-1 rounded-full text-xs bg-cyan-100 text-cyan-700";
+        return "px-3 py-1 rounded-full text-xs bg-red-100 text-red-600"
     };
 
     return (
         <>
 
-            <main className="flex-1 lg:ml-64 pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
+            <main className="flex-1  pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
 
                 {/* CENTER WRAPPER */}
                 <div className="max-w-7xl mx-auto space-y-6">
 
                     {/* HERO */}
-
+ {/* HEADER */}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800">
+            My Patients
+          </h1>
+          <p className="text-slate-500 mt-1">
+            View and manage assigned patient appointments
+          </p>
+        </div>
+        {/* SUMMARY CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Card
+            icon={<Users />}
+            title="Total Patients"
+            value={total}
+            color="cyan"
+          />
+          <Card
+            icon={<HeartPulse />}
+            title="Stable"
+            value={stable}
+            color="green"
+          />
+          <Card
+            icon={<Activity />}
+            title="Monitoring"
+            value={monitoring}
+            color="yellow"
+          />
+          <Card
+            icon={<AlertTriangle />}
+            title="Critical"
+            value={critical}
+            color="red"
+          />
+        </div>
 
                     {/* TABLE SECTION */}
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
@@ -76,7 +137,7 @@ const AssignPatient = () => {
                             <table className="w-full min-w-[850px]">
                                 <thead>
                                     <tr className="border-b border-slate-100 bg-slate-50">
-                                        {["Patient Name", "Age", "Condition", "Status", "Actions"].map(
+                                        {["Patient Name", "Age", "Condition", "Appointment Time","Type", "Actions"].map(
                                             (h) => (
                                                 <th
                                                     key={h}
@@ -92,7 +153,7 @@ const AssignPatient = () => {
                                 <tbody>
                                     {patients.map((p) => (
                                         <tr
-                                            key={p.patient_id}
+                                            key={p.appointment_id}
                                             className="border-b border-slate-100 hover:bg-slate-50 transition"
                                         >
                                             {/* NAME */}
@@ -121,7 +182,12 @@ const AssignPatient = () => {
                                             {/* STATUS */}
                                             <td className="px-5 py-4">
                                                 <span className={statusClass(p.status)}>
-                                                    {p.status}
+                                                    {p.appointment_time}
+                                                </span>
+                                            </td> {/* STATUS */}
+                                            <td className="px-5 py-4">
+                                                <span className={statusClass(p.type)}>
+                                                    {p.type}
                                                 </span>
                                             </td>
 
@@ -148,7 +214,7 @@ const AssignPatient = () => {
                                                         }}
                                                         className="px-3 py-2 rounded-xl bg-cyan-700 text-white text-xs flex items-center gap-1 hover:bg-cyan-800"
                                                     >
-                                                        <Edit3 size={14} /> Updateg
+                                                        <Edit3 size={14} /> Update
                                                     </button>
 
                                                 </div>
@@ -174,3 +240,28 @@ const AssignPatient = () => {
     )
 }
 export default AssignPatient
+
+// * CARD COMPONENT */
+const Card = ({ icon, title, value, color }) => {
+  const colors = {
+    cyan: "bg-cyan-100 text-cyan-700",
+    green: "bg-green-100 text-green-700",
+    yellow: "bg-yellow-100 text-yellow-700",
+    red: "bg-red-100 text-red-700"
+  };
+
+  return (
+    <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center ${colors[color]}`}
+      >
+        {icon}
+      </div>
+
+      <p className="text-slate-500 text-sm mt-4">{title}</p>
+      <h2 className="text-3xl font-bold text-slate-800 mt-1">
+        {value}
+      </h2>
+    </div>
+  );
+};

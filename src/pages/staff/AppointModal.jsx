@@ -83,6 +83,18 @@ const AppointModal = ({
     }
     fetchAppointmentBYId()
   },[selectedItem.patient_id])
+   const statusClass = (type) => {
+        if (type=== "stable")
+            return "px-3 py-1 rounded-full text-xs bg-green-100 text-green-600";
+
+        if (type === "monitoring")
+            return "px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700";
+
+        if (type === "critical")
+            return "px-3 py-1 rounded-full text-xs bg-red-100 text-red-600";
+
+        return "px-3 py-1 rounded-full text-xs bg-red-100 text-red-600"
+    };
 
   return (
     <div
@@ -105,14 +117,14 @@ const AppointModal = ({
               {/* badges */}
               <div className="flex gap-2 mb-4 flex-wrap">
                 <span
-                  className="px-3 py-1.5 rounded-xl text-xs"
+                 className={statusClass(selectedItem.assignment_status)}
                   style={{
                     backgroundColor: priority.bg,
                     color: priority.color,
                     fontWeight: 700,
                   }}
                 >
-                  {priority.label}
+                  {selectedItem.assignment_status}
                 </span>
 
                 <span

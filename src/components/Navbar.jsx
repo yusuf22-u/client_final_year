@@ -17,6 +17,7 @@ function Navbar({ setSidebarOpen }) {
   const [open, setOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notification, setNotification] = useState([]);
+  console.log("user",user)
 
   const notifRef = useRef(null);
 
@@ -24,18 +25,28 @@ function Navbar({ setSidebarOpen }) {
     return `${user?.first_name?.[0] || ""}${user?.last_name?.[0] || ""}`;
   };
 
-  useEffect(() => {
-    const fetchNotification = async () => {
-      try {
-        const res = await API.get("/notifications");
-        setNotification(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+ useEffect(() => {
+  const fetchNotification = async () => {
+    try {
+      let baseUrl = "";
 
+      if (user?.role === "admin") {
+        baseUrl = "/notifications";
+      } else {
+        baseUrl = `/notifications/get_user`;
+      }
+
+      const res = await API.get(baseUrl);
+      setNotification(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  if (user) {
     fetchNotification();
-  }, []);
+  }
+}, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

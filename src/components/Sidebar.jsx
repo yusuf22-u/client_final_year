@@ -13,6 +13,7 @@ import {
   FileText,
   User,
   HeartPulse,
+  User2
 } from "lucide-react";
 // import { Link } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
@@ -31,22 +32,22 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
     { icon: Pill, label: "Pharmacy", path: "/admin/pharmacy" },
     { icon: BarChart3, label: "Reports", path: "/admin/report" },
     { icon: MessageSquare, label: "Messages", path: "/admin/message" },
-    // { icon: Settings, label: "Settings", path: "/admin/settings" },
+    { icon: User2, label: "Settings", path: "/admin/users-management" },
 
   ];
   const patientMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
     { icon: Calendar, label: "Appointments", path: "/admin/booking" },
     { icon: Activity, label: "Medical Records", path: "/admin/my-medical-record" },
-    { icon: MessageSquare, label: "Messages", path: "/patient?tab=messages" },
+    { icon: MessageSquare, label: "Messages", path: "/admin/message" },
     { icon: User, label: "Profile", path: "/admin/my-profile" },
   ];
   const doctorMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
-    { icon: Users, label: "Assigned Patients", path: "/admin/assign-patient" },
-    { icon: Calendar, label: "Appointments", path: "/admin/doctor-appointments" },
+    // { icon: Users, label: "Assigned Patients", path: "/admin/assign-patient" },
+    { icon: Calendar, label: "Appointments", path: "/admin/assign-patient" },
     // { icon: FileText, label: "Medical Records", path: "/admin/medical/:patient_id" },
-    { icon: MessageSquare, label: "Messages", path: "/doctor?tab=messages" },
+    { icon: MessageSquare, label: "Messages", path: "/admin/message" },
     { icon: User, label: "Profile", path: "/admin/user-account" },
   ];
   useEffect(() => {

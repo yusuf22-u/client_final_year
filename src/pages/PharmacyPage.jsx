@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Pill,
   AlertTriangle,
@@ -10,20 +10,10 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import API from "../api/axios"
 
-const summaryCards = [
-  { label: "Total Medicines", value: "284", icon: Pill, color: "#0E7490", bg: "#E0F7FA", sub: "Active inventory" },
-  { label: "Low Stock", value: "12", icon: AlertTriangle, color: "#F59E0B", bg: "#FEF3C7", sub: "Below threshold" },
-  { label: "Expiring Soon", value: "8", icon: Clock, color: "#14B8A6", bg: "#E6FFFA", sub: "Within 30 days" },
-  { label: "Out of Stock", value: "5", icon: XCircle, color: "#EF4444", bg: "#FEE2E2", sub: "Requires order" },
-];
 
-const medicines = [
-  { id: 1, name: "Amlodipine", category: "Cardiovascular", quantity: 240, expiry: "Dec 2026", status: "in-stock" },
-  { id: 2, name: "Losartan 50mg", category: "Antihypertensive", quantity: 18, expiry: "Mar 2026", status: "low-stock" },
-  { id: 3, name: "Metformin 500mg", category: "Antidiabetic", quantity: 0, expiry: "Jun 2026", status: "out-of-stock" },
-  { id: 4, name: "Atorvastatin", category: "Lipid-lowering", quantity: 180, expiry: "Nov 2026", status: "in-stock" },
-];
+
 
 const statusCfg = {
   "in-stock": { label: "In Stock", color: "#22C55E", bg: "#DCFCE7" },
@@ -35,6 +25,66 @@ export default function PharmacyPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [medicines, setMedicines] = useState([]);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [summaryCards, setSummaryCards] = useState([]);
+  const [editId, setEditId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    category: "",
+    quantity: "",
+    expiry: "",
+    status: "in-stock",
+  });
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    quantity: "",
+    expiry: "",
+    status: "in-stock",
+  });
+
+  useEffect(() => {
+    fetchMedicines();
+  }, []);
+  const handleEditClick = (medicine) => {
+    setEditId(medicine.id);
+
+    setEditForm({
+      name: medicine.name,
+      category: medicine.category,
+      quantity: medicine.quantity,
+      expiry: medicine.expiry?.split("T")[0] || medicine.expiry,
+      status: medicine.status,
+    });
+
+    setShowEditModal(true);
+  };
+  const handleUpdate = async () => {
+    try {
+      await API.put(`/pharmacy/${editId}`, editForm);
+
+      setShowEditModal(false);
+      setEditId(null);
+
+      fetchMedicines(); // refresh table
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchMedicines = async () => {
+  try {
+    const { data } = await API.get("/pharmacy");
+
+    const meds = data.data;
+    setMedicines(meds);
+
+    // 🔥 BUILD SUMMARY CARDS HERE
+    generateSummary(meds);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const filtered = medicines.filter((m) => {
     const matchSearch =
@@ -45,13 +95,98 @@ export default function PharmacyPage() {
 
     return matchSearch && matchStatus;
   });
+  const handleSave = async () => {
+    try {
+      await API.post("/pharmacy", {
+        ...form,
+        status: getStatus(Number(form.quantity)),
+      });
 
+      setShowAddModal(false);
+
+      setForm({
+        name: "",
+        category: "",
+        quantity: "",
+        expiry: "",
+        status: "in-stock",
+      });
+
+      fetchMedicines(); // refresh table
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleDelete = async (id) => {
+    try {
+      await API.delete(`/pharmacy/${id}`);
+      fetchMedicines();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const generateSummary = (meds) => {
+  const total = meds.length;
+
+  const lowStock = meds.filter((m) => m.quantity > 0 && m.quantity <= 20).length;
+
+  const outOfStock = meds.filter((m) => m.quantity === 0).length;
+
+  const expiringSoon = meds.filter((m) => {
+    const today = new Date();
+    const expiry = new Date(m.expiry);
+
+    const diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
+
+    return diffDays <= 30 && diffDays >= 0;
+  }).length;
+
+  setSummaryCards([
+    {
+      label: "Total Medicines",
+      value: total,
+      icon: Pill,
+      color: "#0E7490",
+      bg: "#E0F7FA",
+      sub: "Active inventory",
+    },
+    {
+      label: "Low Stock",
+      value: lowStock,
+      icon: AlertTriangle,
+      color: "#F59E0B",
+      bg: "#FEF3C7",
+      sub: "Below threshold",
+    },
+    {
+      label: "Expiring Soon",
+      value: expiringSoon,
+      icon: Clock,
+      color: "#14B8A6",
+      bg: "#E6FFFA",
+      sub: "Within 30 days",
+    },
+    {
+      label: "Out of Stock",
+      value: outOfStock,
+      icon: XCircle,
+      color: "#EF4444",
+      bg: "#FEE2E2",
+      sub: "Requires order",
+    },
+  ]);
+};
+  const getStatus = (qty) => {
+    if (qty == 0) return "out-of-stock";
+    if (qty <= 20) return "low-stock";
+    return "in-stock";
+  };
   return (
-    <div className="min-h-screen flex overflow-x-hidden bg-[#F8FAFC]">
-      
+    <div className="min-h-screen mt-4 flex overflow-x-hidden bg-[#F8FAFC]">
+
       {/* MAIN */}
       <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-        
+
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-x-hidden">
 
           {/* SUMMARY CARDS */}
@@ -118,7 +253,7 @@ export default function PharmacyPage() {
           {/* DESKTOP TABLE */}
           {/* ========================= */}
           <div className="hidden md:block bg-white rounded-2xl overflow-hidden">
-            
+
             <div className="w-full overflow-x-auto">
               <table className="min-w-[800px] w-full">
                 <thead>
@@ -140,7 +275,7 @@ export default function PharmacyPage() {
                         <td className="p-4">{m.name}</td>
                         <td className="p-4">{m.category}</td>
                         <td className="p-4">{m.quantity}</td>
-                        <td className="p-4">{m.expiry}</td>
+                        <td className="p-4">{new Date(m.expiry).toLocaleDateString()}</td>
                         <td className="p-4">
                           <span
                             className="px-2 py-1 text-xs rounded-lg"
@@ -150,10 +285,16 @@ export default function PharmacyPage() {
                           </span>
                         </td>
                         <td className="p-4 flex gap-2">
-                          <button className="p-2 border rounded-lg">
+                          <button
+                            onClick={() => handleEditClick(m)}
+                            className="p-2 border rounded-lg text-blue-600"
+                          >
                             <Edit3 size={14} />
                           </button>
-                          <button className="p-2 border rounded-lg">
+                          <button
+                            onClick={() => handleDelete(m.id)}
+                            className="p-2 border rounded-lg text-red-500"
+                          >
                             <Trash2 size={14} />
                           </button>
                         </td>
@@ -186,13 +327,19 @@ export default function PharmacyPage() {
 
                   <p className="text-sm text-slate-500">{m.category}</p>
                   <p className="text-sm">Qty: {m.quantity}</p>
-                  <p className="text-sm">Expiry: {m.expiry}</p>
+                  <p className="text-sm">Expiry: {new Date(m.expiry).toLocaleDateString()}</p>
 
                   <div className="flex gap-2 mt-3">
-                    <button className="flex-1 border py-2 rounded-xl">
+                    <button
+                      onClick={() => handleEditClick(m)}
+                      className="flex-1 border py-2 rounded-xl"
+                    >
                       Edit
                     </button>
-                    <button className="flex-1 border py-2 rounded-xl text-red-500">
+                    <button
+                      onClick={() => handleDelete(m.id)}
+                      className="flex-1 border py-2 rounded-xl text-red-500"
+                    >
                       Delete
                     </button>
                   </div>
@@ -216,17 +363,133 @@ export default function PharmacyPage() {
             </div>
 
             <div className="space-y-3">
-              <input className="w-full p-3 border rounded-xl" placeholder="Name" />
-              <input className="w-full p-3 border rounded-xl" placeholder="Category" />
-              <input className="w-full p-3 border rounded-xl" placeholder="Quantity" />
+              <input
+                className="w-full p-3 border rounded-xl"
+                placeholder="Medicine Name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+
+              <input
+                className="w-full p-3 border rounded-xl"
+                placeholder="Category"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              />
+
+              <input
+                className="w-full p-3 border rounded-xl"
+                type="number"
+                placeholder="Quantity"
+                value={form.quantity}
+                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+              />
+
+              <input
+                className="w-full p-3 border rounded-xl"
+                type="date"
+                value={form.expiry}
+                onChange={(e) => setForm({ ...form, expiry: e.target.value })}
+              />
+
+              <select
+                className="w-full p-3 border rounded-xl"
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+              >
+                <option value="in-stock">In Stock</option>
+                <option value="low-stock">Low Stock</option>
+                <option value="out-of-stock">Out of Stock</option>
+              </select>
             </div>
 
-            <button className="w-full mt-4 bg-[#0E7490] text-white py-3 rounded-xl">
-              Save
+            <button
+              onClick={handleSave}
+              className="w-full mt-4 bg-[#0E7490] text-white py-3 rounded-xl"
+            >
+              Save Medicine
             </button>
           </div>
         </div>
       )}
+
+      {showEditModal && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+    <div className="bg-white w-full max-w-md rounded-2xl p-5">
+      
+      {/* HEADER */}
+      <div className="flex justify-between mb-4">
+        <h2 className="font-semibold">Edit Medicine</h2>
+        <button onClick={() => setShowEditModal(false)}>
+          <X />
+        </button>
+      </div>
+
+      {/* FORM */}
+      <div className="space-y-3">
+
+        <input
+          className="w-full p-3 border rounded-xl"
+          placeholder="Medicine Name"
+          value={editForm.name}
+          onChange={(e) =>
+            setEditForm({ ...editForm, name: e.target.value })
+          }
+        />
+
+        <input
+          className="w-full p-3 border rounded-xl"
+          placeholder="Category"
+          value={editForm.category}
+          onChange={(e) =>
+            setEditForm({ ...editForm, category: e.target.value })
+          }
+        />
+
+        <input
+          className="w-full p-3 border rounded-xl"
+          type="number"
+          placeholder="Quantity"
+          value={editForm.quantity}
+          onChange={(e) =>
+            setEditForm({ ...editForm, quantity: e.target.value })
+          }
+        />
+
+        <input
+          className="w-full p-3 border rounded-xl"
+          type="date"
+          value={editForm.expiry}
+          onChange={(e) =>
+            setEditForm({ ...editForm, expiry: e.target.value })
+          }
+        />
+
+        <select
+          className="w-full p-3 border rounded-xl"
+          value={editForm.status}
+          onChange={(e) =>
+            setEditForm({ ...editForm, status: e.target.value })
+          }
+        >
+          <option value="in-stock">In Stock</option>
+          <option value="low-stock">Low Stock</option>
+          <option value="out-of-stock">Out of Stock</option>
+        </select>
+
+      </div>
+
+      {/* BUTTON */}
+      <button
+        onClick={handleUpdate}
+        className="w-full mt-4 bg-blue-600 text-white py-3 rounded-xl"
+      >
+        Update Medicine
+      </button>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }

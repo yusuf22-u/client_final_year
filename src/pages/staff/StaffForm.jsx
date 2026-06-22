@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 function StaffForm({ staff, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    full_name: "",
+    
     email: "",
     phone: "",
     role: "Doctor",
@@ -15,7 +15,7 @@ function StaffForm({ staff, onClose, onSuccess }) {
     rating: 5,
     status: "Active",
     license_no:"",
-    address:""
+    
   });
 
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ function StaffForm({ staff, onClose, onSuccess }) {
   useEffect(() => {
     if (staff) {
       setFormData({
-        full_name: staff.full_name || "",
+       
         email: staff.email || "",
         phone: staff.phone || "",
         role: staff.role || "Doctor",
@@ -34,7 +34,7 @@ function StaffForm({ staff, onClose, onSuccess }) {
         rating: staff.rating || 5,
         status: staff.status || "Active",
         license_no:staff.license_no,
-        address:staff.address
+        
       });
     }
   }, [staff]);
@@ -87,31 +87,9 @@ function StaffForm({ staff, onClose, onSuccess }) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Full Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Full Name</label>
-            <input
-              type="text"
-              name="full_name"
-              placeholder="Enter full name"
-              value={formData.full_name}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-xl px-4 py-2 border-slate-200 bg-slate-50 focus:ring-teal-200 focus:border-teal-400"
-            />
-          </div>
+         
           {/* address */}
-          <div>
-            <label className="block text-sm font-medium mb-1 capitalize">address</label>
-            <input
-              type="text"
-              name="address"
-              placeholder="Enter address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-xl px-4 py-2 border-slate-200 bg-slate-50 focus:ring-teal-200 focus:border-teal-400"
-            />
-          </div>
+          
 
           {/* Email */}
           <div>

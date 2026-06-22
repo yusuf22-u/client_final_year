@@ -1,234 +1,581 @@
-import React, { useState } from "react";
-import { HeartPulse, Shield, Zap, Lock } from "lucide-react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import InputField from "../components/forms/InputField";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Mail,
+  Lock,
+  Phone,
+  MapPin,
+  Calendar,
+  Briefcase,
+  HeartPulse,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  ArrowRight,
+  Building,
+  Shield,
+  AlertCircle,
+} from "lucide-react";
 import API from "../api/axios";
-import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
-function Register() {
-  const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function RegisterPage() {
+  const navigate = useNavigate();
 
-  const formik = useFormik({
-    initialValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      profile_image: null,
-    },
+  const [step, setStep] = useState(1);
 
-    validationSchema: Yup.object({
-      firstName: Yup.string().required("First name is required"),
-      lastName: Yup.string().required("Last name is required"),
-      phone: Yup.string().required("Phone is required"),
-      email: Yup.string().email("Invalid email").required("Email is required"),
-      password: Yup.string().min(6).required("Password is required"),
-      confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password")], "Passwords must match")
-        .required("Confirm password is required"),
-    }),
+  // form
+  const [role, setRole] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
-    onSubmit: async (values) => {
-      setLoading(true);
-      setServerError("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-      try {
-        const formData = new FormData();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [agree, setAgree] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-        formData.append("firstName", values.firstName);
-        formData.append("lastName", values.lastName);
-        formData.append("phone", values.phone);
-        formData.append("email", values.email);
-        formData.append("password", values.password);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setProfileImage(file);
 
-        if (values.profile_image) {
-          formData.append("profile_image", values.profile_image);
-        }
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
-        await API.post("/users/register", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+  // ❌ IMPORTANT: no admin registration
+  const roles = [
+    { id: "patient", label: "Patient", icon: User },
+    { id: "doctor", label: "Doctor", icon: HeartPulse },
+    { id: "nurse", label: "Nurse", icon: User },
+    { id: "pharmacist", label: "Pharmacist", icon: Shield },
+    { id: "lab_technician", label: "Lab Tech", icon: User },
+  ];
 
-        toast.success("Account created successfully");
-        window.location.href = "/";
+  // validation
+  const emailValid = /\S+@\S+\.\S+/.test(email);
+  const phoneValid = phone.length >= 7;
 
-      } catch (error) {
-        setServerError(
-          error.response?.data?.message || "Registration failed"
-        );
-      } finally {
-        setLoading(false);
+  const passwordValid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password);
+
+  const step1Valid = role !== "";
+
+  const step2Valid =
+    firstName &&
+    lastName &&
+    emailValid &&
+    phoneValid;
+
+  const step3Valid =
+    passwordValid &&
+    password === confirmPassword &&
+    agree;
+
+  // REGISTER
+  const handleRegister = async () => {
+    try {
+      const formData = new FormData();
+
+      formData.append("first_name", firstName);
+      formData.append("last_name", lastName);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("password", password);
+      formData.append("role", role);
+
+      if (profileImage) {
+        formData.append("profile_image", profileImage);
       }
-    },
-  });
+
+      const res = await API.post("/users/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success("Account created");
+
+      const userId = res.data.userId;
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("role", role);
+
+      if (role === "patient") {
+        navigate("/complete-patient-profile");
+      } else {
+        navigate("/complete-staff-profile");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Registration failed");
+    }
+  };
 
   return (
-    <div className="bg-background min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+      <div className="w-full max-w-5xl">
 
-      {/* LEFT PANEL */}
-      <div className="relative w-full lg:w-[45%] min-h-75 lg:min-h-screen side text-white p-6 flex flex-col justify-between">
+        {/* Header */}
+        {/* Header */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+            <div
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center"
+              style={{ backgroundColor: "#0E7490" }}
+            >
+              <HeartPulse className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+            </div>
 
-        <div className="absolute inset-0 overlay"></div>
-
-        <div className="relative z-10">
-
-          <div className="flex items-center gap-2 text-2xl font-semibold p-4">
-            <HeartPulse />
-            <span>HealthCore</span>
+            <div className="text-center sm:text-left">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+                HealthCare Portal
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 font-semibold">
+                Create your account
+              </p>
+            </div>
           </div>
-
-          <div className="px-4 mt-8">
-
-            <h1 className="text-3xl lg:text-5xl font-bold leading-tight">
-              Join the Healthcare System
-            </h1>
-
-            <ul className="flex flex-col gap-4 mt-8 text-sm">
-              <li className="flex items-center gap-3"><Shield size={18}/> Secure Records</li>
-              <li className="flex items-center gap-3"><Zap size={18}/> Fast System</li>
-              <li className="flex items-center gap-3"><Lock size={18}/> Role Security</li>
-            </ul>
-
-          </div>
-
         </div>
 
-        <p className="relative z-10 text-xs text-teal-200 mt-6">
-          © 2026 HealthCore System
-        </p>
+        {/* Progress Steps */}
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-center gap-6 md:gap-4">
+
+          {[
+            { num: 1, label: "Select Role" },
+            { num: 2, label: "Personal Info" },
+            { num: 3, label: "Security & Verification" },
+          ].map((s, idx) => (
+            <div
+              key={s.num}
+              className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4"
+            >
+              {/* step content */}
+              <div className="flex items-center gap-3">
+
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0"
+                  style={{
+                    backgroundColor: step >= s.num ? "#0E7490" : "#E2E8F0",
+                    color: step >= s.num ? "#fff" : "#94A3B8",
+                    fontWeight: 700,
+                  }}
+                >
+                  {step > s.num ? (
+                    <CheckCircle className="w-5 h-5" />
+                  ) : (
+                    s.num
+                  )}
+                </div>
+
+                <div className="leading-tight">
+                  <p className="text-xs text-slate-500 font-semibold">
+                    STEP {s.num}
+                  </p>
+                  <p className="text-sm md:text-sm text-slate-800 font-bold">
+                    {s.label}
+                  </p>
+                </div>
+
+              </div>
+
+              {/* connector */}
+              {idx < 2 && (
+                <div
+                  className="
+            w-1 h-10 md:w-16 md:h-1 rounded-full
+            ml-5 md:ml-0
+          "
+                  style={{
+                    backgroundColor: step > s.num ? "#0E7490" : "#E2E8F0",
+                  }}
+                />
+              )}
+            </div>
+          ))}
+
+        </div>
+        <div className="bg-white rounded-2xl p-8 shadow-xl">
+          {/* STEP 1 */}
+{step === 1 && (
+  <div>
+    <div>
+      <h2 className="text-center mb-2 text-xl sm:text-2xl font-extrabold text-slate-900">
+        Select Your Role
+      </h2>
+
+      <p className="text-center text-sm text-slate-500 mb-6 sm:mb-8">
+        Choose how you'll be using the HealthCare Portal
+      </p>
+
+      {/* ROLE GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-5xl mx-auto">
+        {roles.map((r) => {
+          const isSelected = role === r.id;
+
+          return (
+            <button
+              key={r.id}
+              onClick={() => setRole(r.id)}
+              className="
+                p-4 sm:p-6 rounded-2xl border-2
+                transition-all hover:shadow-lg
+                text-left sm:text-center
+              "
+              style={{
+                borderColor: isSelected ? r.color : "#E2E8F0",
+                backgroundColor: isSelected ? `${r.color}10` : "#fff",
+              }}
+            >
+              {/* ICON */}
+              <div
+                className="
+                  w-12 h-12 sm:w-16 sm:h-16
+                  rounded-2xl flex items-center justify-center
+                  mx-auto mb-3 sm:mb-4
+                "
+                style={{ backgroundColor: r.bg }}
+              >
+                <r.icon
+                  className="w-6 h-6 sm:w-8 sm:h-8"
+                  style={{ color: r.color }}
+                />
+              </div>
+
+              {/* TITLE */}
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">
+                {r.label}
+              </h3>
+
+              {/* DESCRIPTION */}
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                {r.description || "Select this role to continue"}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* CONTINUE BUTTON */}
+    <button
+      onClick={() => setStep(2)}
+      disabled={!step1Valid}
+      className="
+        mt-6 w-full py-3 rounded-xl
+        bg-teal-600 text-white font-semibold
+        disabled:opacity-40 disabled:cursor-not-allowed
+      "
+    >
+      Continue <ArrowRight className="inline ml-2 w-4 h-4" />
+    </button>
+  </div>
+)}
+
+          {/* STEP 2 */}
+         {step === 2 && (
+  <div className="w-full max-w-2xl mx-auto px-2 sm:px-0">
+
+    {/* HEADER */}
+    <h2 className="text-center mb-2 text-xl sm:text-2xl font-extrabold text-slate-900">
+      Personal Information
+    </h2>
+
+    <p className="text-center text-sm text-slate-500 mb-6 sm:mb-8">
+      Please provide your personal details
+    </p>
+
+    {/* FORM */}
+    <div className="space-y-5">
+
+      {/* FIRST NAME */}
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          First Name *
+        </label>
+
+        <div className="relative">
+          <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+          <input
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Enter your first name"
+            className="
+              w-full pl-10 pr-4 py-3
+              text-sm sm:text-base
+              border border-slate-200 rounded-xl
+              bg-slate-50 text-slate-700
+              focus:outline-none focus:border-teal-400 focus:bg-white
+              transition-all
+            "
+          />
+        </div>
+      </div>
+
+      {/* LAST NAME */}
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Last Name *
+        </label>
+
+        <div className="relative">
+          <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+          <input
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Enter your last name"
+            className="
+              w-full pl-10 pr-4 py-3
+              text-sm sm:text-base
+              border border-slate-200 rounded-xl
+              bg-slate-50 text-slate-700
+              focus:outline-none focus:border-teal-400 focus:bg-white
+              transition-all
+            "
+          />
+        </div>
+      </div>
+
+      {/* EMAIL + PHONE (STACK ON MOBILE) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        {/* EMAIL */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Email Address *
+          </label>
+
+          <div className="relative">
+            <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your.email@example.com"
+              className="
+                w-full pl-10 pr-4 py-3
+                text-sm sm:text-base
+                border border-slate-200 rounded-xl
+                bg-slate-50 text-slate-700
+                focus:outline-none focus:border-teal-400 focus:bg-white
+                transition-all
+              "
+            />
+          </div>
+        </div>
+
+        {/* PHONE */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Phone Number *
+          </label>
+
+          <div className="relative">
+            <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="(+220) 000-0000"
+              className="
+                w-full pl-10 pr-4 py-3
+                text-sm sm:text-base
+                border border-slate-200 rounded-xl
+                bg-slate-50 text-slate-700
+                focus:outline-none focus:border-teal-400 focus:bg-white
+                transition-all
+              "
+            />
+          </div>
+        </div>
 
       </div>
 
-      {/* RIGHT PANEL */}
-      <div className="w-full lg:w-[55%] flex items-center justify-center p-4 sm:p-6 lg:p-10">
+      {/* PROFILE UPLOAD */}
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Profile Picture
+        </label>
 
-        <form
-          onSubmit={formik.handleSubmit}
-          className="w-full max-w-lg bg-white rounded-2xl p-6 sm:p-8 shadow-lg"
-        >
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="
+            w-full p-3 text-sm
+            border border-slate-200 rounded-xl
+            bg-slate-50
+          "
+        />
 
-          {/* HEADER */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-primary">
-              <HeartPulse className="w-8 h-8 text-white"/>
-            </div>
-
-            <h2 className="text-xl font-bold text-slate-800">
-              Create Account
-            </h2>
-
-            <p className="text-sm text-slate-400">
-              Register to access system
-            </p>
-          </div>
-
-          {serverError && (
-            <div className="text-red-500 text-center mb-3">
-              {serverError}
-            </div>
-          )}
-
-          {/* GRID INPUTS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-            <InputField
-              label="First Name"
-              name="firstName"
-              value={formik.values.firstName}
-              onChange={formik.handleChange}
-              error={formik.touched.firstName && formik.errors.firstName}
-            />
-
-            <InputField
-              label="Last Name"
-              name="lastName"
-              value={formik.values.lastName}
-              onChange={formik.handleChange}
-              error={formik.touched.lastName && formik.errors.lastName}
-            />
-
-            <InputField
-              label="Phone"
-              name="phone"
-              value={formik.values.phone}
-              onChange={formik.handleChange}
-              error={formik.touched.phone && formik.errors.phone}
-            />
-
-            <InputField
-              label="Email"
-              name="email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              error={formik.touched.email && formik.errors.email}
-            />
-
-            <InputField
-              label="Password"
-              type="password"
-              name="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              error={formik.touched.password && formik.errors.password}
-            />
-
-            <InputField
-              label="Confirm Password"
-              type="password"
-              name="confirmPassword"
-              value={formik.values.confirmPassword}
-              onChange={formik.handleChange}
-              error={formik.touched.confirmPassword && formik.errors.confirmPassword}
-            />
-
-          </div>
-
-          {/* IMAGE UPLOAD (FULL WIDTH) */}
-          <div className="mt-4">
-            <label className="text-sm font-medium">Profile Image</label>
-
-            <input
-              type="file"
-              name="profile_image"
-              accept="image/*"
-              onChange={(e) =>
-                formik.setFieldValue("profile_image", e.target.files[0])
-              }
-              className="w-full mt-1 border p-2 rounded-lg"
+        {/* PREVIEW */}
+        {preview && (
+          <div className="mt-4 flex justify-center">
+            <img
+              src={preview}
+              alt="preview"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border"
             />
           </div>
-
-          {/* BUTTON */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-5 bg-primary text-white py-3 rounded-xl font-medium
-            hover:bg-primary-dark transition-all
-            disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Creating account..." : "Register"}
-          </button>
-
-          <p className="text-sm mt-4 text-center">
-            Already have an account?{" "}
-            <Link to="/" className="text-primary font-medium">
-              Login
-            </Link>
-          </p>
-
-        </form>
-
+        )}
       </div>
 
     </div>
+
+    {/* BUTTON */}
+    <button
+      onClick={() => setStep(3)}
+      disabled={!step2Valid}
+      className="
+        mt-6 w-full py-3 rounded-xl
+        bg-teal-600 text-white font-semibold
+        disabled:opacity-40 disabled:cursor-not-allowed
+        transition-all
+      "
+    >
+      Continue
+    </button>
+
+  </div>
+)}
+
+          {/* STEP 3 */}
+        {step === 3 && (
+  <div className="w-full max-w-2xl mx-auto px-2 sm:px-0">
+
+    {/* HEADER */}
+    <h2 className="text-center mb-2 text-xl sm:text-2xl font-extrabold text-slate-900">
+      Security & Verification
+    </h2>
+
+    <p className="text-center text-sm text-slate-500 mb-6 sm:mb-8">
+      Secure your account and complete verification
+    </p>
+
+    {/* FORM */}
+    <div className="space-y-5">
+
+      {/* PASSWORD */}
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Password *
+        </label>
+
+        <div className="relative">
+          <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Create a strong password"
+            className="
+              w-full pl-10 pr-12 py-3
+              text-sm sm:text-base
+              border border-slate-200 rounded-xl
+              bg-slate-50 text-slate-700
+              focus:outline-none focus:border-teal-400 focus:bg-white
+              transition-all
+            "
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* CONFIRM PASSWORD */}
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Confirm Password *
+        </label>
+
+        <div className="relative">
+          <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+          <input
+            type={showConfirm ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Re-enter your password"
+            className="
+              w-full pl-10 pr-12 py-3
+              text-sm sm:text-base
+              border border-slate-200 rounded-xl
+              bg-slate-50 text-slate-700
+              focus:outline-none focus:border-teal-400 focus:bg-white
+              transition-all
+            "
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowConfirm(!showConfirm)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+          >
+            {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    {/* TERMS */}
+    <div className="flex items-start gap-2 mt-5">
+      <input
+        type="checkbox"
+        checked={agree}
+        onChange={(e) => setAgree(e.target.checked)}
+        className="mt-1"
+      />
+      <label className="text-sm text-slate-600 leading-snug">
+        I agree to terms and conditions
+      </label>
+    </div>
+
+    {/* BUTTON */}
+    <button
+      onClick={handleRegister}
+      disabled={!step3Valid}
+      className="
+        mt-6 w-full py-3 rounded-xl
+        bg-green-600 text-white font-semibold
+        disabled:opacity-40 disabled:cursor-not-allowed
+        transition-all
+      "
+    >
+      Create Account
+    </button>
+
+  </div>
+)}
+
+          {/* navigation */}
+          <div className="mt-6 flex justify-between">
+            <button onClick={() => step > 1 ? setStep(step - 1) : navigate("/")}>
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
-export default Register;

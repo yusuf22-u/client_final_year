@@ -28,7 +28,7 @@ const DoctorAppt = () => {
         });
 
         // backend should return { success:true, appointments:[] }
-        console.log("appon",res.data)
+        console.log("appon",res.appointments)
         setPatients(res.data.appointments || []);
       } catch (error) {
         console.log(error);
@@ -76,7 +76,7 @@ const DoctorAppt = () => {
   }
 
   return (
-    <main className="flex-1 lg:ml-64 pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
+    <main className="flex-1 pt-20 px-4 sm:px-6 lg:px-8 pb-8 bg-slate-100 min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* HEADER */}

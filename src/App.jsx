@@ -22,7 +22,10 @@ import { UserAccountPage } from "./pages/UserAccountPage";
 import {Profile} from "./pages/patients/Profile"
 import PatientMedicalRecord from "./pages/patients/PatientMedicalRecord"
 import DoctorAppt from "./pages/staff/DoctorAppt";
-
+import CompletePatientProfile from "./pages/patients/CompletePatientProfile";
+import CompleteStaffProfile from "./pages/staff/CompleteStaffProfile";
+import UserMessage from "./pages/staff/UserMessage";
+import UserManagement from "./pages/UserManagement";
 function App() {
   const { loading } = useAuth();
 
@@ -35,6 +38,8 @@ function App() {
       {/* Public login route */}
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/complete-patient-profile" element={<CompletePatientProfile />} />
+      <Route path="/complete-staff-profile" element={<CompleteStaffProfile />} />
 
       {/* Admin routes wrapped in ProtectedRoute and AdminLayout */}
       <Route
@@ -54,7 +59,7 @@ function App() {
         <Route path="appointment" element={<AppointmentsPage/>} /> {/* /admin/appointment */}
         <Route path="pharmacy" element={<PharmacyPage/>} /> {/* /admin/pharmacy */}
         <Route path="report" element={<AnalyticsPage/>} /> {/* /admin/report */}
-        <Route path="message" element={<MessagesPage/>} /> {/* /admin/message */}
+        {/* <Route path="message" element={<MessagesPage/>} /> /admin/message */}
         <Route path="medical/:patient_id" element={<MedicalRecordPage/>} /> {/* /admin/medical */}
         <Route path="booking" element={<PatientBooking/>} /> {/* /admin/booking */}
         <Route path="user-account" element={<UserAccountPage/>} /> {/* /user-account/booking */}
@@ -62,6 +67,8 @@ function App() {
         <Route path="my-profile" element={<Profile/>} /> {/* /admin/assign-patient */}
         <Route path="my-medical-record" element={<PatientMedicalRecord/>} /> {/* /admin/my-medical-record */}
         <Route path="doctor-appointments" element={<DoctorAppt/>} /> {/* /admin/doctor-appointments */}
+        <Route path="message" element={<UserMessage/>} /> {/* /admin/doctor-appointments */}
+        <Route path="users-management" element={<UserManagement/>} /> {/* /admin/doctor-appointments */}
         
         {/* Add more admin pages here */}
       </Route>

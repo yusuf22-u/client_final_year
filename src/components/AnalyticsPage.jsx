@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -15,6 +15,8 @@ import {
   Legend,
 } from "recharts";
 import { Download, TrendingUp, Users, Calendar, BedDouble } from "lucide-react";
+import API from "../api/axios";
+// import { COLOR_PANEL } from "recharts/types/util/Constants";
 
 const monthlyPatients = [
   { month: "Jan", patients: 240, new: 48, returning: 192 },
@@ -55,17 +57,70 @@ const bedOccupancy = [
   { name: "Occupied", value: 69, color: "#EF4444" },
   { name: "Available", value: 31, color: "#22C55E" },
 ];
-
-const keyMetrics = [
-  { label: "Avg. Daily Admissions", value: "42", change: "+8.5%", up: true, icon: Users, color: "#0E7490", bg: "#E0F7FA" },
-  { label: "Avg. Length of Stay", value: "3.8 days", change: "-0.5 days", up: true, icon: Calendar, color: "#14B8A6", bg: "#E6FFFA" },
-  { label: "Bed Occupancy Rate", value: "69%", change: "+5%", up: false, icon: BedDouble, color: "#F59E0B", bg: "#FEF3C7" },
-  { label: "Patient Satisfaction", value: "4.7/5", change: "+0.2", up: true, icon: TrendingUp, color: "#22C55E", bg: "#DCFCE7" },
+const COLORS = [
+  "#0E7490",
+  "#14B8A6",
+  "#22C55E",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EC4899",
+  "#EF4444",
+  "#3B82F6",
 ];
 
 export function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("2026");
+  const [report, setReport] = useState(null);
 
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        const { data } = await API.get("/reports/hospital-report");
+        setReport(data.report);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchReport();
+  }, []);
+
+  const keyMetrics = [
+    {
+      label: "Total Patients",
+      value: report?.summary?.totalPatients || 0,
+      icon: Users,
+      color: "#0E7490",
+      bg: "#E0F7FA",
+    },
+    {
+      label: "Total Doctors",
+      value: report?.summary?.totalDoctors || 0,
+      icon: TrendingUp,
+      color: "#14B8A6",
+      bg: "#E6FFFA",
+    },
+    {
+      label: "Total Nurses",
+      value: report?.summary?.totalNurses || 0,
+      icon: Calendar,
+      color: "#F59E0B",
+      bg: "#FEF3C7",
+    },
+    {
+      label: "Conditions",
+      value: report?.conditions?.length || 0,
+      icon: BedDouble,
+      color: "#22C55E",
+      bg: "#DCFCE7",
+    },
+  ];
+const downloadPDF = () => {
+  window.open(
+    `${import.meta.env.VITE_API_URL}/api/reports/hospital-report/pdf`,
+    "_blank"
+  );
+};
   return (
     <div
       className="min-h-screen w-full flex overflow-x-hidden"
@@ -97,7 +152,7 @@ export function AnalyticsPage() {
                 <option value="2025">Year 2025</option>
               </select>
 
-              <button
+              <button  onClick={downloadPDF}
                 className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm w-full sm:w-auto"
                 style={{ backgroundColor: "#0E7490", fontWeight: 600 }}
               >
@@ -127,11 +182,8 @@ export function AnalyticsPage() {
                 <p className="text-sm text-slate-500 font-semibold">
                   {m.label}
                 </p>
-                <p
-                  className="text-xs mt-1 font-semibold"
-                  style={{ color: m.up ? "#22C55E" : "#EF4444" }}
-                >
-                  {m.change} vs last period
+                <p className="text-xs mt-1 font-semibold text-slate-500">
+                  Current records
                 </p>
               </div>
             ))}
@@ -167,16 +219,56 @@ export function AnalyticsPage() {
               <div className="w-full h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={diseaseDistribution} dataKey="value" outerRadius={70}>
-                      {diseaseDistribution.map((d, i) => (
-                        <Cell key={i} fill={d.color} />
+                    <Pie
+                      data={
+                        report?.conditions?.map((item) => ({
+                          name: item.condition_state,
+                          value: item.total,
+                        })) || []
+                      }
+                      dataKey="value"
+                      nameKey="name"
+                      outerRadius={70}
+                    >
+                      {(report?.conditions || []).map((_, index) => (
+                        <Cell
+                          key={index}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
+
                     <Tooltip />
                   </PieChart>
+
                 </ResponsiveContainer>
+                <div className="mt-[-20px] space-y-2">
+                  {(report?.conditions || []).map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{
+                            backgroundColor:
+                              COLORS[index % COLORS.length],
+                          }}
+                        />
+                        <span>{item.condition_state}</span>
+                      </div>
+
+                      <span className="font-semibold">
+                        {item.total}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
+
             </div>
+
 
           </div>
 
@@ -189,13 +281,12 @@ export function AnalyticsPage() {
 
               <div className="w-full h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={ageGroups}>
+                  <BarChart data={report?.ageGroups || []}>
                     <CartesianGrid />
-                    <XAxis dataKey="age" />
+                    <XAxis dataKey="age_group" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="male" fill="#0E7490" />
-                    <Bar dataKey="female" fill="#14B8A6" />
+                    <Bar dataKey="total" fill="#0E7490" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
