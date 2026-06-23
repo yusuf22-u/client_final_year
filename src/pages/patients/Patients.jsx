@@ -19,12 +19,12 @@ function Patient() {
   const [assignModal, setAssignModal] = useState(false);
 
   const [form, setForm] = useState({
-    doctor_id: "",
-    condition_state: "",
-    status: "stable",
-    notes: ""
-  });
-
+  doctor_id: "",
+  assignment_type: "primary",
+  condition_state: "",
+  status: "stable",
+  notes: ""
+});
 
 
   const calculateAge = (dob) => {

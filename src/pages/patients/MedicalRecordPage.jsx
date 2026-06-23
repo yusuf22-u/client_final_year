@@ -35,6 +35,8 @@ import { useParams, Link } from "react-router-dom";
 import { calculateAge } from "../../helpers/calculateAge";
 import { formatDate } from "../../helpers/formatDate"
 import PrescriptionForm from "./PrescriptionForm";
+// import { formatDate } from "../../helpers/formatDate";
+import { useAuth } from "../../context/AuthContext";
 const patientInfo = {
   id: 1,
   name: "Maria Santos",
@@ -166,8 +168,9 @@ export function MedicalRecordPage() {
   const [patients, setPatient] = useState(null);
   const [vitals, setVitals] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
+  const {user}=useAuth()
   const { patient_id } = useParams()
-  console.log("patient_id", patient_id)
+  console.log("patient_id", vitals)
   console.log("prescriptions", prescriptions)
   const [vitalForm, setVitalForm] = useState({
     date: "",
@@ -203,7 +206,7 @@ export function MedicalRecordPage() {
     { id: "history", label: "Medical History", icon: Clock },
   ];
 
-  const latestVitals = vitalHistory[0];
+  const latestVitals = vitals[0];
 
   return (
     <div className="min-h-screen flex" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#F8FAFC" }}>
@@ -303,12 +306,12 @@ export function MedicalRecordPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
 
                   {[
-                    { label: "Blood Pressure", value: latestVitals.bp, unit: "mmHg", icon: Heart, color: "#EF4444" },
-                    { label: "Heart Rate", value: latestVitals.hr, unit: "bpm", icon: Activity, color: "#F59E0B" },
-                    { label: "Temperature", value: latestVitals.temp, unit: "°C", icon: Thermometer, color: "#22C55E" },
-                    { label: "Weight", value: latestVitals.weight, unit: "kg", icon: Weight, color: "#0E7490" },
-                    { label: "Respiratory", value: latestVitals.respiratory, unit: "bpm", icon: Activity, color: "#8B5CF6" },
-                    { label: "O2 Saturation", value: latestVitals.oxygen, unit: "%", icon: Droplets, color: "#06B6D4" },
+                    { label: "Blood Pressure", value: latestVitals?.blood_pressure, unit: "mmHg", icon: Heart, color: "#EF4444" },
+                    { label: "Heart Rate", value: latestVitals?.heart_rate, unit: "bpm", icon: Activity, color: "#F59E0B" },
+                    { label: "Temperature", value: latestVitals?.temperature, unit: "°C", icon: Thermometer, color: "#22C55E" },
+                    { label: "Weight", value: latestVitals?.weight, unit: "kg", icon: Weight, color: "#0E7490" },
+                    { label: "Respiratory", value: latestVitals?.respiratory_rate, unit: "bpm", icon: Activity, color: "#8B5CF6" },
+                    { label: "O2 Saturation", value: latestVitals?.oxygen_saturation, unit: "%", icon: Droplets, color: "#06B6D4" },
                   ].map((vital) => (
                     <div
                       key={vital.label}
@@ -336,7 +339,7 @@ export function MedicalRecordPage() {
                 </div>
 
                 <p className="text-[11px] sm:text-xs text-slate-500 mt-3">
-                  Last updated: {latestVitals.date}
+                  Last updated: {formatDate(latestVitals?.recorded_at)}
                 </p>
               </div>
 
@@ -356,8 +359,8 @@ export function MedicalRecordPage() {
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-sm sm:text-base font-bold text-slate-900 truncate">
-                        {patientInfo.primaryDoctor}
+                      <p className="text-sm capitalize sm:text-base font-bold text-slate-900 truncate">
+                        {`Dr. ${user?.first_name} ${user?.last_name}`}
                       </p>
                       <p className="text-xs sm:text-sm text-slate-500">
                         Internal Medicine

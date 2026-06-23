@@ -6,16 +6,18 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 
+import { registerSW } from 'virtual:pwa-register'
 
-
+// register service worker (PWA)
+registerSW()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-    <BrowserRouter>
-      <App />
-      <Toaster position="top-right" />
-    </BrowserRouter>
+      <BrowserRouter>
+        <App />
+        <Toaster position="top-right" />
+      </BrowserRouter>
     </AuthProvider>
   </StrictMode>
 )

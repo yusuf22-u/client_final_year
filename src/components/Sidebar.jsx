@@ -33,6 +33,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
     { icon: BarChart3, label: "Reports", path: "/admin/report" },
     { icon: MessageSquare, label: "Messages", path: "/admin/message" },
     { icon: User2, label: "Settings", path: "/admin/users-management" },
+   
 
   ];
   const patientMenuItems = [
@@ -46,7 +47,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
     // { icon: Users, label: "Assigned Patients", path: "/admin/assign-patient" },
     { icon: Calendar, label: "Appointments", path: "/admin/assign-patient" },
-    // { icon: FileText, label: "Medical Records", path: "/admin/medical/:patient_id" },
+    // { icon: FileText, label: "Medical Records", path: "/admin/medical-report" },
     { icon: MessageSquare, label: "Messages", path: "/admin/message" },
     { icon: User, label: "Profile", path: "/admin/user-account" },
   ];

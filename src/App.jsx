@@ -26,6 +26,7 @@ import CompletePatientProfile from "./pages/patients/CompletePatientProfile";
 import CompleteStaffProfile from "./pages/staff/CompleteStaffProfile";
 import UserMessage from "./pages/staff/UserMessage";
 import UserManagement from "./pages/UserManagement";
+import DoctorPatientPage from "./pages/staff/DoctorPatientPage"
 function App() {
   const { loading } = useAuth();
 
@@ -69,6 +70,7 @@ function App() {
         <Route path="doctor-appointments" element={<DoctorAppt/>} /> {/* /admin/doctor-appointments */}
         <Route path="message" element={<UserMessage/>} /> {/* /admin/doctor-appointments */}
         <Route path="users-management" element={<UserManagement/>} /> {/* /admin/doctor-appointments */}
+       <Route path="doctor/patient/:id" element={<DoctorPatientPage />}  />  {/* /admin/doctor-appointments */}
         
         {/* Add more admin pages here */}
       </Route>

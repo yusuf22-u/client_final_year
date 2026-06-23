@@ -8,7 +8,8 @@ import {
   Star,
   Stethoscope,
   Eye,
-  Edit3
+  Edit3,
+  FileText
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import API from "../api/axios";
@@ -21,15 +22,15 @@ export default function DoctorDashboard() {
   const [activeTab, setActiveTab] = useState();
   const [showModal, setShowModal] = useState(false);
   const [patients, setPatients] = useState([]);
+   const [showModalReport, setShowModalReport] = useState(false);
+ console.log("primary p",patients)
 
-
-  // ADD this helper above return()
  useEffect(() => {
   const fetchAssignPatient = async () => {
     try {
-      const res = await API.get("/staff/assign-patients");
-      console.log("assign patient", res.data);
-      setPatients(res.data)
+      const res = await API.get("/patient-records/doctor/patients");
+
+      setPatients(res.data.data); // ✅ FIXED HERE
     } catch (error) {
       console.log("error", error?.response?.data || error.message);
     }
@@ -37,7 +38,6 @@ export default function DoctorDashboard() {
 
   fetchAssignPatient();
 }, []);
-
 const statusClass = (status) => {
   if (status === "stable")
     return "px-3 py-1 rounded-full text-xs bg-green-100 text-green-600";
@@ -140,89 +140,88 @@ return (
         </div>
 
         {/* RESPONSIVE TABLE */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[850px]">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                {["Patient Name", "Age", "Condition", "Status", "Actions"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="text-left px-5 py-4 text-xs font-semibold text-slate-400 uppercase"
-                    >
-                      {h}
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
+<div className="overflow-x-auto">
+  <table className="w-full min-w-[850px]">
+    <thead>
+      <tr className="border-b border-slate-100 bg-slate-50">
+        {["Patient Name", "Age", "Condition", "Status", "Assigned Time", "Actions"].map(
+          (h) => (
+            <th
+              key={h}
+              className="text-left px-5 py-4 text-xs font-semibold text-slate-400 uppercase"
+            >
+              {h}
+            </th>
+          )
+        )}
+      </tr>
+    </thead>
 
-            <tbody>
-              {patients.map((p) => (
-                <tr
-                  key={p.patient_id}
-                  className="border-b border-slate-100 hover:bg-slate-50 transition"
-                >
-                  {/* NAME */}
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 capitalize rounded-full bg-cyan-700 text-white text-xs font-bold flex items-center justify-center">
-                        {p.first_name.charAt(0)} {p.last_name.charAt(0)}
-                      </div>
+    <tbody>
+      {patients.map((p) => (
+        <tr
+          key={p.patient_id}
+          className="border-b border-slate-100 hover:bg-slate-50 transition"
+        >
+          {/* NAME */}
+          <td className="px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-cyan-700 text-white text-xs font-bold flex items-center justify-center">
+                {p.first_name?.charAt(0)}{p.last_name?.charAt(0)}
+              </div>
 
-                      <span className="text-sm font-medium capitalize text-slate-700">
-                        {`${p.first_name} ${p.last_name}`}
-                      </span>
-                    </div>
-                  </td>
+              <span className="text-sm font-medium capitalize text-slate-700">
+                {p.first_name} {p.last_name}
+              </span>
+            </div>
+          </td>
 
-                  {/* AGE */}
-                  <td className="px-5 py-4 text-sm text-slate-500">
-                    {p.age} yrs
-                  </td>
+          {/* AGE */}
+          <td className="px-5 py-4 text-sm text-slate-500">
+            {p.age} yrs
+          </td>
 
-                  {/* CONDITION */}
-                  <td className="px-5 py-4 text-sm text-slate-600">
-                    {p.condition_state}
-                  </td>
+          {/* CONDITION */}
+          <td className="px-5 py-4 text-sm text-slate-600 capitalize">
+            {p.condition_state}
+          </td>
 
-                  {/* STATUS */}
-                  <td className="px-5 py-4">
-                    <span className={statusClass(p.status)}>
-                      {p.status}
-                    </span>
-                  </td>
+          {/* STATUS */}
+          <td className="px-5 py-4">
+            <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 capitalize">
+              {p.status}
+            </span>
+          </td>
 
-                  {/* ACTIONS */}
-                  <td className="px-5 py-4">
-                    <div className="flex gap-2">
+          {/* ASSIGNED TIME */}
+          <td className="px-5 py-4 text-sm text-slate-500">
+            {new Date(p.assigned_at).toLocaleString()}
+          </td>
 
-                      <Link to={`/admin/medical/${p.patient_id}`}
-                       
-                        className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs flex items-center gap-1 hover:bg-slate-50"
-                      >
-                        <Eye size={14} /> View
-                      </Link>
+          {/* ACTIONS */}
+          <td className="px-5 py-4">
+            <div className="flex gap-2">
 
-                      <button
-                        onClick={() => {
-                          setSelectedPatient(p.id);
-                          setActiveTab("Medical Notes");
-                          setShowModal(true);
-                        }}
-                        className="px-3 py-2 rounded-xl bg-cyan-700 text-white text-xs flex items-center gap-1 hover:bg-cyan-800"
-                      >
-                        <Edit3 size={14} /> Updateg
-                      </button>
+              <Link
+                to={`/admin/medical/${p.patient_id}`}
+                className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs flex items-center gap-1 hover:bg-slate-50"
+              >
+                <Eye size={14} /> View
+              </Link>
+              <Link
+  to={`/admin/doctor/patient/${p.patient_id}`}
+  className="px-3 py-2 rounded-xl border text-xs flex gap-1"
+>
+  <FileText size={14} /> View
+</Link>
 
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
-        </div>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
       </div>
     </div>
   </main>

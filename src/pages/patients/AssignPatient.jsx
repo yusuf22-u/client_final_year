@@ -24,9 +24,9 @@ const AssignPatient = () => {
     useEffect(() => {
         const fetchAssignPatients = async () => {
             try {
-                const res = await API.get("/staff/assign-patients");
-                console.log("assign patient", res.data);
-                setPatients(res.data)
+                const res = await API.get("/appointments/doctor-assign-appointment");
+                console.log("assign appointment", res.data.data);
+                setPatients(res.data.data)
             } catch (error) {
                 //   console.log("error", error?.response?.data || error.message);
                 console.log("error", error)
@@ -125,7 +125,7 @@ const AssignPatient = () => {
 
                         <div className="px-5 py-4 border-b border-slate-100">
                             <h3 className="text-slate-800 font-bold text-lg">
-                                Assigned Patients
+                                Appointment details
                             </h3>
                             <p className="text-slate-400 text-sm mt-1">
                                 Click a patient to view or update records
@@ -137,7 +137,7 @@ const AssignPatient = () => {
                             <table className="w-full min-w-[850px]">
                                 <thead>
                                     <tr className="border-b border-slate-100 bg-slate-50">
-                                        {["Patient Name", "Age", "Condition", "Appointment Time","Type", "Actions"].map(
+                                        {["Patient Name", "Age", "location", "Appointment Time","Type", "Actions"].map(
                                             (h) => (
                                                 <th
                                                     key={h}
@@ -153,7 +153,7 @@ const AssignPatient = () => {
                                 <tbody>
                                     {patients.map((p) => (
                                         <tr
-                                            key={p.appointment_id}
+                                            key={p.id}
                                             className="border-b border-slate-100 hover:bg-slate-50 transition"
                                         >
                                             {/* NAME */}
@@ -176,7 +176,7 @@ const AssignPatient = () => {
 
                                             {/* CONDITION */}
                                             <td className="px-5 py-4 text-sm text-slate-600">
-                                                {p.condition_state}
+                                                {p.location}
                                             </td>
 
                                             {/* STATUS */}
@@ -184,7 +184,7 @@ const AssignPatient = () => {
                                                 <span className={statusClass(p.status)}>
                                                     {p.appointment_time}
                                                 </span>
-                                            </td> {/* STATUS */}
+                                            </td> 
                                             <td className="px-5 py-4">
                                                 <span className={statusClass(p.type)}>
                                                     {p.type}

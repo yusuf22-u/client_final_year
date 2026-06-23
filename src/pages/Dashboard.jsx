@@ -47,7 +47,7 @@ function Dashboard() {
   const statCards = [
     {
       label: "Total Patients",
-      value: "4,827",
+      value: "10",
       change: "+12%",
       up: true,
       icon: TrendingUp,
@@ -57,7 +57,7 @@ function Dashboard() {
     },
     {
       label: "Today's Appointments",
-      value: "84",
+      value: "6",
       change: "+5%",
       up: true,
       icon: CheckCircle,
@@ -67,7 +67,7 @@ function Dashboard() {
     },
     {
       label: "Available Beds",
-      value: "37",
+      value: "27",
       change: "-8%",
       up: false,
       icon: Clock,

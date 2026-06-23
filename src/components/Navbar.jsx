@@ -17,7 +17,7 @@ function Navbar({ setSidebarOpen }) {
   const [open, setOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notification, setNotification] = useState([]);
-  console.log("user",user)
+  // console.log("user",user)
 
   const notifRef = useRef(null);
 
